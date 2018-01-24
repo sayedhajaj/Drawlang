@@ -50,7 +50,7 @@ public class Main extends Application {
 		return menuBar;
 	}
 
-	public static TextArea getConsole() {
+	public static Console getConsole() {
 		return ((DrawTab)tabPane.getSelectionModel().getSelectedItem()).getConsole();
 	}
 

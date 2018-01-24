@@ -9,9 +9,11 @@ import javafx.scene.paint.*;
 import javafx.scene.shape.*;
 import javafx.stage.*;
 
+import com.drawlang.drawinterpreter.*;
+
 public class DrawTab extends Tab {
 
-	private TextArea console;
+	private Console console;
 	private Canvas canvas;
 
 	public DrawTab(String title) {
@@ -20,8 +22,9 @@ public class DrawTab extends Tab {
 		BorderPane tabLayout = new BorderPane();
 		Button drawButton = new Button("Draw!");
 		drawButton.setMaxWidth(Double.MAX_VALUE);
-		TextArea textArea = new TextArea();
-		console = new TextArea();
+		Console textArea = new Console();
+		drawButton.setOnAction(e -> Draw.run(textArea.getText()));
+		console = new Console();
 		console.setDisable(true);
 		canvas = new Canvas(640, 480);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -36,7 +39,7 @@ public class DrawTab extends Tab {
 		setContent(tabLayout);
 	}
 
-	public TextArea getConsole() {
+	public Console getConsole() {
 		return console;
 	}
 
