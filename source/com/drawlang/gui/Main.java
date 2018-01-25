@@ -34,6 +34,8 @@ public class Main extends Application {
 		layout.setCenter(tabPane);
 
 		Scene scene = new Scene(layout, 640, 480);
+		// adds stylesheet to override default styles
+		scene.getStylesheets().add("css/draw_default.css");
 		window.setScene(scene);
 		window.show();
 		window.setMaximized(true);

@@ -5,16 +5,20 @@ import java.util.*;
 import com.drawlang.gui.*;
 
 public class Draw {
+	private static final Interpreter interpreter = new Interpreter();
 
 	static boolean hadError = false;
+	static boolean hadRuntimeError = false;
 
 	public static void run(String source) {
 		Scanner scanner = new Scanner(source);
 		List<Token> tokens = scanner.scanTokens();
-		for (Token token : tokens) {
-			Main.getConsole().println(token.toString());
-		}
+		Parser parser = new Parser(tokens);
+		Expr expression = parser.parse();
 
+		if (hadError) return;
+
+		interpreter.interpret(expression);
 	}
 
 	static void error(int line, String message) {
@@ -24,6 +28,19 @@ public class Draw {
 	private static void report(int line, String where, String message) {
 		Main.getConsole().println("[line " + line + "] Error" + where + ": " + message);
 		hadError = true;
+	}
+
+	static void error(Token token, String message) {
+		if (token.type == TokenType.EOF) {
+			report(token.line, " at end", message);
+		} else {
+			report(token.line, " at '" + token.lexeme + "'", message);
+		}
+	}
+
+	static void runtimeError(RuntimeError error) {
+		Main.getConsole().println(error.getMessage() + "\n[line " + error.token.line + "]");
+		hadRuntimeError = true;
 	}
 
 }

@@ -11,6 +11,13 @@ import javafx.stage.*;
 
 public class Console extends TextArea {
 
+	public Console() {
+		super();
+		setEditable(false);
+		setFocusTraversable(false);
+		setMouseTransparent(true);
+	}
+
 	public void print(Object obj) {
 		setText(getText() + (String)obj);
 	}

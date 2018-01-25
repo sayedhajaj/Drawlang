@@ -1,0 +1,3 @@
+.text-area:readonly .content {
+	-fx-background-color: rgb(230, 230, 230);
+}

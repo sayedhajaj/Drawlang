@@ -57,10 +57,9 @@ abstract class Expr {
 	}
 
 	static class Unary extends Expr {
-		Unary(Token operator, Expr right, Boolean postfix) {
+		Unary(Token operator, Expr right) {
 			this.operator = operator;
 			this.right = right;
-			this.postfix = postfix;
 		}
 	
 
@@ -70,7 +69,6 @@ abstract class Expr {
 
 		final Token operator;
 		final Expr right;
-		final Boolean postfix;
 	}
 
 	abstract <R> R accept(Visitor<R> visitor);

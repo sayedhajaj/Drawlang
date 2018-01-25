@@ -22,10 +22,9 @@ public class DrawTab extends Tab {
 		BorderPane tabLayout = new BorderPane();
 		Button drawButton = new Button("Draw!");
 		drawButton.setMaxWidth(Double.MAX_VALUE);
-		Console textArea = new Console();
+		TextArea textArea = new TextArea();
 		drawButton.setOnAction(e -> Draw.run(textArea.getText()));
 		console = new Console();
-		console.setDisable(true);
 		canvas = new Canvas(640, 480);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setFill(Color.WHITE);
