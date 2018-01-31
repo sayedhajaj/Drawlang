@@ -5,7 +5,6 @@ import java.util.*;
 import com.drawlang.gui.*;
 
 public class Draw {
-	private static final Interpreter interpreter = new Interpreter();
 
 	static boolean hadError = false;
 	static boolean hadRuntimeError = false;
@@ -14,11 +13,12 @@ public class Draw {
 		Scanner scanner = new Scanner(source);
 		List<Token> tokens = scanner.scanTokens();
 		Parser parser = new Parser(tokens);
-		Expr expression = parser.parse();
+		List<Stmt> statements = parser.parse();
+		Interpreter interpreter = new Interpreter();
 
 		if (hadError) return;
 
-		interpreter.interpret(expression);
+		interpreter.interpret(statements);
 	}
 
 	static void error(int line, String message) {

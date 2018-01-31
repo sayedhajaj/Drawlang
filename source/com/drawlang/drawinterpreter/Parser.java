@@ -1,6 +1,6 @@
 package com.drawlang.drawinterpreter;
 
-import java.util.List;
+import java.util.*;
 
 import static com.drawlang.drawinterpreter.TokenType.*;
 
@@ -16,16 +16,242 @@ public class Parser {
 		this.tokens = tokens;
 	}
 
-	Expr parse() {
+	// returns a list of statements to be executed
+	List<Stmt> parse() {
+		List<Stmt> statements = new ArrayList<>();
+		while (!isAtEnd()) {
+			statements.add(declaration());
+		}
+
+		return statements;
+	}
+
+	private Expr expression() {
+		return assignment();
+	}
+
+	private Stmt declaration() {
 		try {
-			return expression();
+			// checks if token is function declaration
+			if (match(FUNCTION)) return function("function");
+			// checks if token is a variable declaration
+			if (match(VAR)) return varDeclaration();
+
+			// if not then return previous statment code
+			return statement();
 		} catch (ParseError error) {
+			// error recovery implemented earlier
+			synchronize();
 			return null;
 		}
 	}
 
-	private Expr expression() {
-		return equality();
+	private Stmt statement() {
+		// check for for statement, if so return while statment
+		// from desugaring for
+		if (match(FOR)) return forStatement();
+		// check for if statement, if so return if statement
+		if (match(IF)) return ifStatement();
+		// check for return
+		if (match(RETURN)) return returnStatement();
+		// check for "while"
+		if (match(WHILE)) return whileStatement();
+		// checks for {, if so return block statment
+		if (match(LEFT_BRACE)) return new Stmt.Block(block());
+		// otherwise return expression statement
+		return expressionStatement();
+	}
+
+	private Stmt forStatement() {
+		consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+		// checks the initializer, e.g for('var i = 0') or for('i = 0')
+		// this also allows for no initializer - e.g for(;)
+		Stmt initializer;
+		if (match(SEMICOLON)) {
+			initializer = null;
+		} else if (match(VAR)) {
+			initializer = varDeclaration();
+		} else {
+			initializer = expressionStatement();
+		}
+
+		// checks for a condition - for(var i = 0; 'i < 5')
+		Expr condition = null;
+		if (!check(SEMICOLON)) {
+			condition = expression();
+		}
+		consume(SEMICOLON, "Expect ';' after loop condition.");
+
+		// check for incrementer expression - for(var i = 0; i < 5; 'i = i + 1')
+		Expr increment = null;
+		if (!check(RIGHT_PAREN)) {
+			increment = expression();
+		}
+		consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+		Stmt body = statement();
+
+		// if there is an incrementer add it to the end of the body
+		if (increment != null) 
+			body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+		
+		// if there is no condition it will loop infinitely
+		if (condition == null) condition = new Expr.Literal(true);
+		body = new Stmt.While(condition, body);
+
+		// if there is an initializer then add it to the start of the body
+		if (initializer != null)
+			body = new Stmt.Block(Arrays.asList(initializer, body));
+
+		return body;
+
+	}
+
+	private Stmt ifStatement() {
+		consume(LEFT_PAREN, "Expect '(' after 'if'.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+		// branch to be executed if condition is true
+		Stmt thenBranch = statement();
+		Stmt elseBranch = null;
+		// checks for else branch, if there is an else token then add it
+		if (match(ELSE)) {
+			elseBranch = statement();
+		}
+
+		return new Stmt.If(condition, thenBranch, elseBranch);
+	}
+
+	private Stmt returnStatement() {
+		Token keyword = previous();
+		Expr value = null;
+		// return value is optional
+		if (!check(SEMICOLON)) {
+			value = expression();
+		}
+
+		consume(SEMICOLON, "Expect ';' after return value.");
+		return new Stmt.Return(keyword, value);
+	}
+
+	private Stmt varDeclaration() {
+		// check for variable name and raise error if not
+		// available
+		Token name = consume(IDENTIFIER, "Expect variable name.");
+
+		// optionally checks for initializer. This allows code like:
+		// var message; and var message = "hello";
+		Expr initializer = null;
+		if (match(EQUAL)) {
+			initializer = expression();
+		}
+
+		consume(SEMICOLON, "Expect ';' after variable declaration.");
+		return new Stmt.Var(name, initializer);
+	}
+
+	private Stmt whileStatement() {
+		// after 'while' it needs to parse a '(', then a condition
+		// then a ')' then a statement
+		consume(LEFT_PAREN, "Expect '(' after 'while'.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+		Stmt body = statement();
+
+		return new Stmt.While(condition, body);
+	}
+
+	//similar to above but returns expression statement instead
+	private Stmt expressionStatement() {
+		Expr expr = expression();
+		consume(SEMICOLON, "Expect ';' after expression.");
+		return new Stmt.Expression(expr);
+	}
+
+	private Stmt.Function function(String kind) {
+		// looks for function or method name
+		Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+		consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+		// looks for parameters
+		List<Token> parameters = new ArrayList<>();
+		if (!check(RIGHT_PAREN)) {
+			do {
+				if (parameters.size() >= 8) error(peek(), "Cannot have more than 8 parameters.");
+
+				parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+			} while (match(COMMA));
+		}
+
+		consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+		// looks for function body
+		consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+		List<Stmt> body = block();
+		return new Stmt.Function(name, parameters, body);
+	}
+
+	private List<Stmt> block() {
+		List<Stmt> statements = new ArrayList<Stmt>();
+
+		// keeps adding statement whilst token is not equal to } or end of file
+		while (!check(RIGHT_BRACE) && !isAtEnd()) {
+			statements.add(declaration());
+		}
+
+		// raises error if } is missing
+		consume(RIGHT_BRACE, "Expect '}' after block.");
+		return statements;
+	}
+
+	private Expr assignment() {
+		// defaults to equality expression
+		Expr expr = or();
+
+		// checks if is an assinment
+		if (match(EQUAL)) {
+			Token equals = previous();
+			Expr value = assignment();
+
+			// checks if left expression is variable name
+			if (expr instanceof Expr.Variable) {
+				Token name = ((Expr.Variable)expr).name;
+				return new Expr.Assign(name, value);
+			}
+
+			// if not a variable then raise an error
+
+			error(equals, "Invalid assignment target.");
+		}
+
+		return expr;
+	}
+
+	private Expr or() {
+		// defaults to and if no OR
+		Expr expr = and();
+
+		// loop allows chaining e.g if(1 or 2 or 0 or 2);
+		while (match(OR)) {
+			Token operator = previous();
+			Expr right = and();
+			expr = new Expr.Logical(expr, operator, right);
+		}
+
+		return expr;
+	}
+
+	private Expr and() {
+		// defaults to and
+		Expr expr = equality();
+
+		while (match(AND)) {
+			Token operator = previous();
+			Expr right = equality();
+			expr = new Expr.Logical(expr, operator, right);
+		}
+
+		return expr;
 	}
 
 	private Expr equality() {
@@ -91,7 +317,42 @@ public class Parser {
 		}
 
 		// if not then it returns the lowest precedence
-		return primary();
+		return call();
+	}
+
+	private Expr finishCall(Expr callee) {
+		List<Expr> arguments = new ArrayList<>();
+		 if (!check(RIGHT_PAREN)) {
+		 	// keep adding an argument whilst the current token
+		 	// is a ,
+		 	do {
+		 		// limits number of arguments to 8
+		 		if (arguments.size() >= 8) {
+		 			error(peek(), "Cannot have more than 8 arguments.");
+		 		}
+		 		arguments.add(expression());
+		 	} while (match(COMMA));
+		 }
+
+		 	// returns parentheses token for use in error handling
+		 	Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+		 	return new Expr.Call(callee, paren, arguments);
+	}
+
+	private Expr call() {
+		Expr expr = primary();
+
+		while (true) {
+			if (match(LEFT_PAREN)) {
+				// gathers all the arguments
+				expr = finishCall(expr);
+			} else {
+				break;
+			}
+		}
+
+		return expr;
 	}
 
 	// the lowest precedence - returns literals and groups
@@ -102,6 +363,11 @@ public class Parser {
 
 		if (match(NUMBER, STRING)) {
 			return new Expr.Literal(previous().literal);
+		}
+
+		// checks if token is an identifier e.g a variable name
+		if (match(IDENTIFIER)) {
+			return new Expr.Variable(previous());
 		}
 
 		// check groups '(' and ')', check if there is a closing
@@ -182,7 +448,6 @@ public class Parser {
 				case FOR:
 				case IF:
 				case WHILE:
-				case PRINT:
 				case RETURN:
 					return;
 			}

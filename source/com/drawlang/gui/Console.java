@@ -14,8 +14,8 @@ public class Console extends TextArea {
 	public Console() {
 		super();
 		setEditable(false);
-		setFocusTraversable(false);
-		setMouseTransparent(true);
+		// setFocusTraversable(false);
+		// setMouseTransparent(true);
 	}
 
 	public void print(Object obj) {
