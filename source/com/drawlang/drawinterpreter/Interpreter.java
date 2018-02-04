@@ -10,6 +10,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	// allows interpreter to define things in global scope
 	final Environment globals = new Environment();
 	private Environment environment = globals;
+	// associates expressions with distance from current scope
+	// and scope where variable is defined
+	private final Map<Expr, Integer> locals = new HashMap<>();
 
 	Interpreter() {
 		globals.define("clock", new DrawCallable() {
@@ -103,7 +106,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Object visitVariableExpr(Expr.Variable expr) {
 		// returns the value associated with a variable name
-		return environment.get(expr.name);
+		return lookUpVariable(expr.name, expr);
+	}
+
+	private Object lookUpVariable(Token name, Expr expr) {
+		Integer distance = locals.get(expr);
+		// if distance is null then assume global, else return resolved value
+		return distance == null ? globals.get(name) : environment.getAt(distance, name.lexeme);
 	}
 
 	// checks to see if operand is a number
@@ -158,6 +167,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	private void execute(Stmt stmt) {
 		stmt.accept(this);
+	}
+
+	void resolve(Expr expr, int depth) {
+		locals.put(expr, depth);
 	}
 
 	void executeBlock(List<Stmt> statements, Environment environment) {
@@ -245,8 +258,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		// obtains value
 		Object value = evaluate(expr.value);
 
-		// updates it in environment
-		environment.assign(expr.name, value);
+		Integer distance = locals.get(expr);
+		// if is local then assigns in current environment
+		if (distance != null) {
+			environment.assignAt(distance, expr.name, value);
+		} else {
+			// updates it in global scope
+			globals.assign(expr.name, value);
+		}
+
 		return value;
 	}
 

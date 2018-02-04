@@ -23,6 +23,26 @@ class Environment {
 		values.put(name, value);
 	}
 
+	Environment ancestor(int distance) {
+		// traverses specified distance up parent chain
+		// and returns environment
+		Environment environment = this;
+		for (int i = 0; i < distance; i++) {
+			environment = environment.enclosing; 
+		}
+		return environment;
+	}
+
+	Object getAt(int distance, String name) {
+		// returns value from the environment it is defined in
+		return ancestor(distance).values.get(name);
+	}
+
+	void assignAt(int distance, Token name, Object value) {
+		// assigns value in environment specified
+		ancestor(distance).values.put(name.lexeme, value);
+	}
+
 	Object get(Token name) {
 		// checks if variable is defined
 		// if so, look up name and return value associated with it
