@@ -14,11 +14,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		this.interpreter = interpreter;
 	}
 
-	// enum to handle methods later
 	private enum FunctionType {
 		NONE,
-		FUNCTION
+		FUNCTION,
+		INITIALIZER,
+		METHOD
 	}
+
+	private enum ClassType {
+		NONE,
+		CLASS
+	}
+
+	private ClassType currentClass = ClassType.NONE;
 
 	void resolve(List<Stmt> statements) {
 		for (Stmt statement : statements) {
@@ -33,14 +41,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		currentFunction = type;
 		// introduces new scope for function
 		beginScope();
-		for (Token param : stmt.parameters) {
+		for (Token param : stmt.function.parameters) {
 			// binds all of the functions parameters
 			// so they can be used like variables
 			declare(param);
 			define(param);
 		}
 
-		resolve(stmt.body);
+		resolve(stmt.function.body);
 		endScope();
 		currentFunction = enclosingFunction;
 	}
@@ -51,6 +59,31 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		beginScope();
 		resolve(stmt.statements);
 		endScope();
+		return null;
+	}
+
+	@Override
+	public Void visitClassStmt(Stmt.Class stmt) {
+		declare(stmt.name);
+		define(stmt.name);
+		ClassType enclosingClass = currentClass;
+		currentClass = ClassType.CLASS;
+
+		// defines this keyword in local scope
+		beginScope();
+		scopes.peek().put("this", true);
+
+		for (Stmt.Function method : stmt.methods) {
+			FunctionType declaration = FunctionType.METHOD;
+			if (method.name.lexeme.equals("init"))
+				declaration = FunctionType.INITIALIZER;
+
+			resolveFunction(method, declaration);
+		}
+
+		endScope();
+
+		currentClass = enclosingClass;
 		return null;
 	}
 
@@ -86,7 +119,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		if (currentFunction == FunctionType.NONE)
 			Draw.error(stmt.keyword, "Cannot return from top-level code.");
 		// check if there is a value to return
-		if (stmt.value != null) resolve(stmt.value);
+		if (stmt.value != null) {
+			if (currentFunction == FunctionType.INITIALIZER) {
+				// raise error if returning in constructor
+				Draw.error(stmt.keyword, "Cannot return a value from an initializer.");
+			}
+			resolve(stmt.value);
+		}
 		return null;
 	}
 
@@ -126,6 +165,22 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Void visitFunctionExpr(Expr.Function expr) {
+		FunctionType enclosingFunction = currentFunction;
+		currentFunction = FunctionType.FUNCTION;
+
+		beginScope();
+		for (Token param : expr.parameters) {
+			declare(param);
+			define(param);
+		}
+		resolve(expr.body);
+		endScope();
+		currentFunction = enclosingFunction;
+		return null;
+	}
+
+	@Override
 	public Void visitCallExpr(Expr.Call expr) {
 		// callee could be variable or function name
 		resolve(expr.callee);
@@ -134,6 +189,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 			resolve(argument);
 		}
 
+		return null;
+	}
+
+	@Override
+	public Void visitGetExpr(Expr.Get expr) {
+		resolve(expr.object);
 		return null;
 	}
 
@@ -154,6 +215,25 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		// same as binary because no control flow is being done
 		resolve(expr.left);
 		resolve(expr.right);
+		return null;
+	}
+
+	@Override
+	public Void visitSetExpr(Expr.Set expr) {
+		resolve(expr.value);
+		resolve(expr.object);
+		return null;
+	}
+
+	@Override
+	public Void visitThisExpr(Expr.This expr) {
+		// raise error if using "this" out of class
+		if (currentClass == ClassType.NONE) {
+			Draw.error(expr.keyword, "Cannot use 'this' outside of a class.");
+			return null;
+		}
+
+		resolveLocal(expr, expr.keyword);
 		return null;
 	}
 

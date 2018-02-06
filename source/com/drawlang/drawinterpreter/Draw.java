@@ -10,6 +10,8 @@ public class Draw {
 	static boolean hadRuntimeError = false;
 
 	public static void run(String source) {
+		hadError = false;
+		hadRuntimeError = false;
 		Scanner scanner = new Scanner(source);
 		List<Token> tokens = scanner.scanTokens();
 		Parser parser = new Parser(tokens);

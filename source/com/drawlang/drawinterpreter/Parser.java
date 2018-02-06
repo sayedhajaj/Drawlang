@@ -32,8 +32,13 @@ public class Parser {
 
 	private Stmt declaration() {
 		try {
+			// checks if class declaration
+			if (match(CLASS)) return classDeclaration();
 			// checks if token is function declaration
-			if (match(FUNCTION)) return function("function");
+			if (check(FUNCTION) && checkNext(IDENTIFIER)) {
+				consume(FUNCTION, null);
+				return function("function");
+			}
 			// checks if token is a variable declaration
 			if (match(VAR)) return varDeclaration();
 
@@ -44,6 +49,23 @@ public class Parser {
 			synchronize();
 			return null;
 		}
+	}
+
+	private Stmt classDeclaration() {
+		// checks for class name
+		Token name = consume(IDENTIFIER, "Expect class name.");
+		// checks for {
+		consume(LEFT_BRACE, "Expect '{' before class body.");
+
+		// adds methods
+		List<Stmt.Function> methods = new ArrayList<>();
+		while (!check(RIGHT_BRACE) && !isAtEnd()) {
+			methods.add(function("method"));
+		}
+
+		consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+		return new Stmt.Class(name, methods);
 	}
 
 	private Stmt statement() {
@@ -172,6 +194,11 @@ public class Parser {
 	private Stmt.Function function(String kind) {
 		// looks for function or method name
 		Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+		
+		return new Stmt.Function(name, functionBody(kind));
+	}
+
+	private Expr.Function functionBody(String kind) {
 		consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
 		// looks for parameters
 		List<Token> parameters = new ArrayList<>();
@@ -188,7 +215,7 @@ public class Parser {
 		// looks for function body
 		consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
 		List<Stmt> body = block();
-		return new Stmt.Function(name, parameters, body);
+		return new Expr.Function(parameters, body);
 	}
 
 	private List<Stmt> block() {
@@ -217,6 +244,10 @@ public class Parser {
 			if (expr instanceof Expr.Variable) {
 				Token name = ((Expr.Variable)expr).name;
 				return new Expr.Assign(name, value);
+				// checks if left expression is a get instance
+			} else if (expr instanceof Expr.Get) {
+				Expr.Get get = (Expr.Get)expr;
+				return new Expr.Set(get.object, get.name, value);
 			}
 
 			// if not a variable then raise an error
@@ -347,7 +378,10 @@ public class Parser {
 			if (match(LEFT_PAREN)) {
 				// gathers all the arguments
 				expr = finishCall(expr);
-			} else {
+			} else if (match(DOT)) {
+				Token name = consume(IDENTIFIER,"Expect property name after '.'.");
+				expr = new Expr.Get(expr, name);
+			}else {
 				break;
 			}
 		}
@@ -370,6 +404,9 @@ public class Parser {
 			return new Expr.Variable(previous());
 		}
 
+		// check for "this" token
+		if (match(THIS)) return new Expr.This(previous());
+
 		// check groups '(' and ')', check if there is a closing
 		// bracket and raise an error if not
 		// return grouping expression
@@ -378,6 +415,8 @@ public class Parser {
 			consume(RIGHT_PAREN, "Expect ')' after expression.");
 			return new Expr.Grouping(expr);
 		}
+
+		if (match(FUNCTION)) return functionBody("function");
 
 		// if no expression was returned then there must be a syntax error
 
@@ -408,6 +447,12 @@ public class Parser {
 	private boolean check(TokenType tokenType) {
 		if (isAtEnd()) return false;
 		return peek().type == tokenType;
+	}
+
+	// checks if next token type is equal to token type passed in
+	private boolean checkNext(TokenType tokenType) {
+		if (isAtEnd() || tokens.get(current + 1).type == EOF) return false;
+		return tokens.get(current + 1).type == tokenType;
 	}
 
 	private Token advance() {

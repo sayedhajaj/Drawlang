@@ -89,6 +89,28 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Object visitSetExpr(Expr.Set expr) {
+		Object object = evaluate(expr.object);
+
+		if (!(object instanceof DrawInstance)) { 
+			// raise error if left side of set expression is not
+			// an instance
+			throw new RuntimeError(expr.name, "Only instances have fields.");
+		}
+
+		// set field value in instance
+		Object value = evaluate(expr.value);
+		((DrawInstance)object).set(expr.name, value);
+		return value;
+	}
+
+	@Override
+	public Object visitThisExpr(Expr.This expr) {
+		// returns instance
+		return lookUpVariable(expr.keyword, expr);
+	}
+
+	@Override
 	public Object visitUnaryExpr(Expr.Unary expr) {
 		Object right = evaluate(expr.right);
 
@@ -156,6 +178,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Object visitFunctionExpr(Expr.Function expr) {
+		return new DrawFunction("", expr, environment, false);
+	}
+
+	@Override
 	public Object visitGroupingExpr(Expr.Grouping expr) {
 		return evaluate(expr.expression);
 	}
@@ -196,6 +223,19 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Void visitClassStmt(Stmt.Class stmt) {
+		environment.define(stmt.name.lexeme, null);
+		Map<String, DrawFunction> methods = new HashMap<>();
+		for (Stmt.Function method : stmt.methods) {
+			DrawFunction function = new DrawFunction(method.name.lexeme, method.function, environment, false);
+			methods.put(method.name.lexeme, function);
+		}
+		DrawClass drawClass = new DrawClass(stmt.name.lexeme, methods);
+		environment.assign(stmt.name, drawClass);
+		return null;
+	}
+
+	@Override
 	public Void visitExpressionStmt(Stmt.Expression stmt) {
 		evaluate(stmt.expression);
 		return null;
@@ -203,7 +243,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionStmt(Stmt.Function stmt) {
-		DrawFunction function = new DrawFunction(stmt, environment);
+		DrawFunction function = new DrawFunction(stmt.name.lexeme, stmt.function, environment, false);
 		// associates function name with function in environment
 		environment.define(stmt.name.lexeme, function);
 		return null;
@@ -343,6 +383,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 		return function.call(this, arguments);
 
+	}
+
+	@Override
+	public Object visitGetExpr(Expr.Get expr) {
+		Object object = evaluate(expr.object);
+		// if object is an instance then return field from object
+		if (object instanceof DrawInstance) {
+			return ((DrawInstance) object).get(expr.name);
+		}
+
+		// otherwise return error
+		throw new RuntimeError(expr.name, "Only instances have properties.");
 	}
 
 }
