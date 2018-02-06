@@ -105,6 +105,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Object visitSuperExpr(Expr.Super expr) {
+		int distance = locals.get(expr);
+		// gets super class from class scope
+		DrawClass superclass = (DrawClass)environment.getAt(distance, "super");
+
+		// this is 1 closer than superclass to current scope
+		DrawInstance object = (DrawInstance)environment.getAt(distance - 1, "this");
+
+		// looks for method in superclass
+		DrawFunction method = superclass.findMethod(object, expr.method.lexeme);
+		// throws error if method not found in superclass
+		if (method == null)
+			throw new RuntimeError(expr.method, "Undefined property '" + expr.method.lexeme + "'.");
+
+		return method;
+	}
+
+	@Override
 	public Object visitThisExpr(Expr.This expr) {
 		// returns instance
 		return lookUpVariable(expr.keyword, expr);
@@ -225,12 +243,33 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitClassStmt(Stmt.Class stmt) {
 		environment.define(stmt.name.lexeme, null);
+		// evaluates superclass expression if it exists
+		Object superClass = null;
+		if (stmt.superclass != null) {
+			superClass = evaluate(stmt.superclass);
+			// if expression does not evaluate to a class raise an error
+			if (!(superClass instanceof DrawClass)) {
+				throw new RuntimeError(stmt.name, "Superclass must be a class");
+			}
+			environment = new Environment(environment);
+			environment.define("super", superClass);
+
+		}
+
+		Map<String, DrawFunction> classMethods = new HashMap<>();
+		for (Stmt.Function method : stmt.classMethods) {
+			DrawFunction function = new DrawFunction(method.name.lexeme, method.function, environment, false);
+			classMethods.put(method.name.lexeme, function);
+		}
+		DrawClass metaClass = new DrawClass(null, stmt.name.lexeme + " metaclass", null, classMethods);
+
 		Map<String, DrawFunction> methods = new HashMap<>();
 		for (Stmt.Function method : stmt.methods) {
 			DrawFunction function = new DrawFunction(method.name.lexeme, method.function, environment, false);
 			methods.put(method.name.lexeme, function);
 		}
-		DrawClass drawClass = new DrawClass(stmt.name.lexeme, methods);
+		DrawClass drawClass = new DrawClass(metaClass, stmt.name.lexeme, (DrawClass)superClass, methods);
+		if (superClass != null) environment = environment.enclosing;
 		environment.assign(stmt.name, drawClass);
 		return null;
 	}

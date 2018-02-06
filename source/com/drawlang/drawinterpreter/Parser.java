@@ -54,18 +54,33 @@ public class Parser {
 	private Stmt classDeclaration() {
 		// checks for class name
 		Token name = consume(IDENTIFIER, "Expect class name.");
+
+		// checks if extends another class
+		Expr superclass = null;
+		if (match(EXTENDS)) {
+			// checks for superclass name
+			consume(IDENTIFIER, "Expect superclass name.");
+			superclass = new Expr.Variable(previous());
+		}
+
 		// checks for {
 		consume(LEFT_BRACE, "Expect '{' before class body.");
 
 		// adds methods
 		List<Stmt.Function> methods = new ArrayList<>();
+		List<Stmt.Function> classMethods = new ArrayList<>();
+
 		while (!check(RIGHT_BRACE) && !isAtEnd()) {
-			methods.add(function("method"));
+
+			// check if static method
+			boolean isClassMethod = match(STATIC);
+			if(isClassMethod) classMethods.add(function("method"));
+			else methods.add(function("method"));
 		}
 
 		consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-		return new Stmt.Class(name, methods);
+		return new Stmt.Class(name, superclass, methods, classMethods);
 	}
 
 	private Stmt statement() {
@@ -404,6 +419,14 @@ public class Parser {
 			return new Expr.Variable(previous());
 		}
 
+		// checks for "super" token plus method name
+		if (match(SUPER)) {
+			Token keyword = previous();
+			consume(DOT, "Expect '.' after 'super'.");
+			Token method = consume(IDENTIFIER, "Expect superclass method name.");
+			return new Expr.Super(keyword, method);
+		}
+
 		// check for "this" token
 		if (match(THIS)) return new Expr.This(previous());
 
@@ -496,7 +519,6 @@ public class Parser {
 				case RETURN:
 					return;
 			}
-
 			advance();
 		}
 	}

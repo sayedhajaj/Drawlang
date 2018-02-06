@@ -2,19 +2,29 @@ package com.drawlang.drawinterpreter;
 
 import java.util.*;
 
-class DrawClass implements DrawCallable {
+class DrawClass extends DrawInstance implements DrawCallable {
 	final String name;
+	final DrawClass superclass;
 	private final Map<String, DrawFunction> methods;
 
-	DrawClass(String name, Map<String, DrawFunction> methods) {
+	DrawClass(DrawClass metaclass, String name, DrawClass superclass, Map<String, DrawFunction> methods) {
+		super(metaclass);
+		this.superclass = superclass;
 		this.name = name;
 		this.methods = methods;
 	}
 
 	DrawFunction findMethod(DrawInstance instance, String name) {
-		// if method is defined return in and bind it to instance
+		// if method is defined return it and bind it to instance
 		// in local scope
-		return methods.containsKey(name) ? methods.get(name).bind(instance) : null;
+		if (methods.containsKey(name))
+			return methods.get(name).bind(instance);
+
+		// if not found and superclass exists then search superclass
+		if (superclass != null) 
+			return superclass.findMethod(instance, name);
+
+		return null;
 	}
 
 	@Override
