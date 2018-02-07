@@ -10,6 +10,7 @@ public class Parser {
 
 	private final List<Token> tokens;
 	private int current = 0;
+	private int loops = 0;
 
 	// takes in token generated from scanner
 	Parser(List<Token> tokens) {
@@ -27,7 +28,19 @@ public class Parser {
 	}
 
 	private Expr expression() {
-		return assignment();
+		return comma();
+	}
+
+	private Expr comma() {
+		Expr expr = assignment();
+
+		while (match(COMMA)) {
+			Token operator = previous();
+			Expr right = assignment();
+			expr = new Expr.Binary(expr, operator, right);
+		}
+
+		return expr;
 	}
 
 	private Stmt declaration() {
@@ -91,8 +104,14 @@ public class Parser {
 		if (match(IF)) return ifStatement();
 		// check for return
 		if (match(RETURN)) return returnStatement();
+		// check for do while
+		if (match(DO)) return doWhileStatement();
 		// check for "while"
 		if (match(WHILE)) return whileStatement();
+		// checks for break
+		if (match(BREAK)) return breakStatement();
+		// checks for continue
+		if (match(CONTINUE)) return continueStatement();
 		// checks for {, if so return block statment
 		if (match(LEFT_BRACE)) return new Stmt.Block(block());
 		// otherwise return expression statement
@@ -126,6 +145,7 @@ public class Parser {
 			increment = expression();
 		}
 		consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+		loops++;
 		Stmt body = statement();
 
 		// if there is an incrementer add it to the end of the body
@@ -139,7 +159,7 @@ public class Parser {
 		// if there is an initializer then add it to the start of the body
 		if (initializer != null)
 			body = new Stmt.Block(Arrays.asList(initializer, body));
-
+		loops--;
 		return body;
 
 	}
@@ -188,15 +208,43 @@ public class Parser {
 		return new Stmt.Var(name, initializer);
 	}
 
+	private Stmt doWhileStatement() {
+		// syntactic sugar around a while statement
+		loops++;
+		Stmt body = statement();
+		consume(WHILE, "Expect 'while' in a do-while loop.");
+		consume(LEFT_PAREN, "Expect '(' after 'while'.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+		consume(SEMICOLON, "Expect ';' after do-while statement");
+		loops--;
+		return new Stmt.Block(Arrays.asList(body, new Stmt.While(condition, body)));
+	}
+
 	private Stmt whileStatement() {
 		// after 'while' it needs to parse a '(', then a condition
 		// then a ')' then a statement
 		consume(LEFT_PAREN, "Expect '(' after 'while'.");
 		Expr condition = expression();
 		consume(RIGHT_PAREN, "Expect ')' after condition.");
+		loops++;
 		Stmt body = statement();
-
+		loops--;
 		return new Stmt.While(condition, body);
+	}
+
+	private Stmt breakStatement() {
+		// throws error if not in loop
+		if (!(loops > 0)) throw error(previous(), "Break statement must be inside a loop.");
+		consume(SEMICOLON, "Expect ';' after 'break' statement.");
+		return new Stmt.Break();
+	}
+
+	private Stmt continueStatement() {
+		// throws error if not in loop
+		if (!(loops > 0)) throw error(previous(), "Continue statement must be inside a loop.");
+		consume(SEMICOLON, "Expect ';' after 'continue' statement.");
+		return new Stmt.Continue();
 	}
 
 	//similar to above but returns expression statement instead
@@ -209,7 +257,6 @@ public class Parser {
 	private Stmt.Function function(String kind) {
 		// looks for function or method name
 		Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-		
 		return new Stmt.Function(name, functionBody(kind));
 	}
 
@@ -247,27 +294,50 @@ public class Parser {
 	}
 
 	private Expr assignment() {
-		// defaults to equality expression
-		Expr expr = or();
+		// defaults to ternary expression
+		Expr expr = ternary();
+
+		if(check(EQUAL) && expr instanceof Expr.Get) {
+			match(EQUAL);
+			Expr.Get get = (Expr.Get)expr;
+			return new Expr.Set(get.object, get.name, get.index, assignment());
+		}
+
 
 		// checks if is an assinment
-		if (match(EQUAL)) {
+		if (match(EQUAL, PLUS_EQUAL, MINUS_EQUAL, STAR_EQUAL, SLASH_EQUAL, STAR_STAR_EQUAL, MODULOS_EQUAL)) {
 			Token equals = previous();
 			Expr value = assignment();
 
 			// checks if left expression is variable name
 			if (expr instanceof Expr.Variable) {
 				Token name = ((Expr.Variable)expr).name;
-				return new Expr.Assign(name, value);
+				return new Expr.Assign(name, value, equals);
 				// checks if left expression is a get instance
 			} else if (expr instanceof Expr.Get) {
 				Expr.Get get = (Expr.Get)expr;
-				return new Expr.Set(get.object, get.name, value);
+				return new Expr.Set(get.object, get.name, get.index, value);
 			}
 
 			// if not a variable then raise an error
 
 			error(equals, "Invalid assignment target.");
+		}
+
+		return expr;
+	}
+
+	private Expr ternary() {
+		// defaults to or if no ?
+		// this is the condition
+		Expr expr = or();
+		if (match(QUESTION)) {
+			// checks for branch if condition is met
+			Expr thenBranch = expression();
+			consume(COLON, "Expect ':' after then branch of ternary expression.");
+			// checks for branch if condition is not met
+			Expr elseBranch = ternary();
+			expr = new Expr.Ternary(expr, thenBranch, elseBranch);
 		}
 
 		return expr;
@@ -316,12 +386,48 @@ public class Parser {
 	}
 
 	private Expr comparison() {
-		Expr expr = addition();
+		Expr expr = term();
 
 		// similar to above method but goes to the next precedence level down
 		while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
 			Token operator = previous();
-			Expr right = addition();
+			Expr right = term();
+			expr = new Expr.Binary(expr, operator, right);
+		}
+
+		return expr;
+	}
+
+	private Expr term() {
+		Expr expr = factor();
+
+		while (match(MINUS, PLUS, MODULOS)) {
+			Token operator = previous();
+			Expr right = factor();
+			expr = new Expr.Binary(expr, operator, right);
+		}
+
+		return expr;
+	}
+
+	private Expr factor() {
+		Expr expr = exponent();
+
+		while (match(SLASH, STAR)) {
+			Token operator = previous();
+			Expr right = exponent();
+			expr = new Expr.Binary(expr, operator, right);
+		}
+		
+		return expr;
+	}
+
+	private Expr exponent() {
+		Expr expr = unary();
+
+		while (match(STAR_STAR)) {
+			Token operator = previous();
+			Expr right = unary();
 			expr = new Expr.Binary(expr, operator, right);
 		}
 
@@ -356,13 +462,25 @@ public class Parser {
 
 	private Expr unary() {
 		// checks if unary
-		if (match(BANG, MINUS)) {
+		if (match(BANG, MINUS, PLUS_PLUS, MINUS_MINUS)) {
 			Token operator = previous();
 			Expr right = unary();
-			return new Expr.Unary(operator, right);
+			return new Expr.Unary(operator, right, false);
 		}
 
 		// if not then it returns the lowest precedence
+		return postfix();
+	}
+
+	private Expr postfix() {
+		if (matchNext(PLUS_PLUS, MINUS_MINUS)) {
+			Token operator = peek();
+			current--;
+			Expr left = primary();
+			advance();
+			return new Expr.Unary(operator, left, true);
+		}
+
 		return call();
 	}
 
@@ -395,8 +513,14 @@ public class Parser {
 				expr = finishCall(expr);
 			} else if (match(DOT)) {
 				Token name = consume(IDENTIFIER,"Expect property name after '.'.");
-				expr = new Expr.Get(expr, name);
-			}else {
+				expr = new Expr.Get(expr, name, null);
+			} else if (match(LEFT_SUB)) {
+				// if token is '[' parse an expression then check for ']'
+				// then return get expression with index but no name
+				Expr index = expression();
+				expr = new Expr.Get(expr, null, index);
+				consume(RIGHT_SUB, "Expect closing ']'");
+			} else {
 				break;
 			}
 		}
@@ -451,6 +575,18 @@ public class Parser {
 	private boolean match(TokenType... types) {
 		for (TokenType type : types) {
 			if (check(type)) {
+				advance();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// similar to above but next token instead
+	private boolean matchNext(TokenType... types) {
+		for (TokenType type : types) {
+			if (checkNext(type)) {
 				advance();
 				return true;
 			}

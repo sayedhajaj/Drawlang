@@ -28,9 +28,12 @@ public class Scanner {
 		keywords.put("this",		THIS);
 		keywords.put("true",		TRUE);
 		keywords.put("var",			VAR);
+		keywords.put("do",          DO);
 		keywords.put("while",		WHILE);
 		keywords.put("extends",     EXTENDS);
 		keywords.put("static",      STATIC);
+		keywords.put("break",       BREAK);
+		keywords.put("continue",    CONTINUE);
 	}
 
 	Scanner(String source) {
@@ -62,12 +65,27 @@ public class Scanner {
 			case ')': addToken(RIGHT_PAREN); break;
 			case '{': addToken(LEFT_BRACE); break;
 			case '}': addToken(RIGHT_BRACE); break;
+			case '[': addToken(LEFT_SUB); break;
+			case ']': addToken(RIGHT_SUB); break;
 			case ',': addToken(COMMA); break;
 			case '.': addToken(DOT); break;
-			case '-': addToken(MINUS); break;
-			case '+': addToken(PLUS); break;
+			case '-': 
+				// check for -- or -= or just -
+				addToken(match('-') ? MINUS_MINUS : match('=') ? MINUS_EQUAL : MINUS); 
+				break;
+			case '+': 
+				// same with +
+				addToken(match('+') ? PLUS_PLUS : match('=') ? PLUS_EQUAL : PLUS); 
+				break;
 			case ';': addToken(SEMICOLON); break;
-			case '*': addToken(STAR); break;
+			case ':': addToken(COLON); break;
+			case '?': addToken(QUESTION); break;
+			case '%': 
+				addToken(match('=') ? MODULOS_EQUAL : MODULOS); 
+				break;
+			case '*': 
+				addToken(match('*') ? match('=') ? STAR_STAR_EQUAL : STAR_STAR : match('=') ? STAR_EQUAL : STAR);
+				break;
 			// if the current character is ! and the next is = then the token is != - it checks if two things
 			// are not equal, if it's just ! then it negates the next value
 			// ! then it negates
@@ -81,6 +99,30 @@ public class Scanner {
 					// if it's a single
 					// line  comment then consume each character until the end of the line
 					while (peek() != '\n' && ! isAtEnd()) advance();
+				} else if (match('*')) {
+					// allows nesting by counting
+					// number of comments
+					int comments = 1;
+					while (!isAtEnd()) {
+						// decreases comments when closed
+						if(peek() == '*' && peekNext() == '/') comments--;
+						// increases when new one
+						if(peek() == '/' && peekNext() == '*') comments++;
+						// skips to next line
+						if(peekNext() == '\n') line++;
+						if(comments == 0) break;
+						advance();
+					}
+					// closes comment
+					if(peek() == '*' && peekNext() == '/') {
+						advance();
+						advance();
+					} else {
+						// raises error if not closed
+						Draw.error(line, "Unclosed block comment.");
+					}
+				} else if (match('=')) {
+					addToken(SLASH_EQUAL);
 				} else {
 					// otherwise add a slash token - most likely for division
 					addToken(SLASH);

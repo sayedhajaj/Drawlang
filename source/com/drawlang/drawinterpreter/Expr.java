@@ -15,6 +15,7 @@ abstract class Expr {
 		R visitLogicalExpr(Logical expr);
 		R visitSetExpr(Set expr);
 		R visitSuperExpr(Super expr);
+		R visitTernaryExpr(Ternary expr);
 		R visitThisExpr(This expr);
 		R visitUnaryExpr(Unary expr);
 		R visitVariableExpr(Variable expr);
@@ -56,10 +57,12 @@ abstract class Expr {
 	}
 
 	static class Get extends Expr {
-		Get(Expr object, Token name) {
+		Get(Expr object, Token name, Expr index) {
 			this.object = object;
 			this.name = name;
+			this.index = index;
 		}
+	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitGetExpr(this);
@@ -67,6 +70,7 @@ abstract class Expr {
 
 		final Expr object;
 		final Token name;
+		final Expr index;
 	}
 
 	static class Grouping extends Expr {
@@ -112,11 +116,13 @@ abstract class Expr {
 	}
 
 	static class Set extends Expr {
-		Set(Expr object, Token name, Expr value) {
+		Set(Expr object, Token name, Expr index, Expr value) {
 			this.object = object;
 			this.name = name;
+			this.index = index;
 			this.value = value;
 		}
+	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitSetExpr(this);
@@ -124,6 +130,7 @@ abstract class Expr {
 
 		final Expr object;
 		final Token name;
+		final Expr index;
 		final Expr value;
 	}
 
@@ -141,6 +148,22 @@ abstract class Expr {
 		final Token method;
 	}
 
+	static class Ternary extends Expr {
+		Ternary(Expr expr, Expr thenBranch, Expr elseBranch) {
+			this.expr = expr;
+			this.thenBranch = thenBranch;
+			this.elseBranch = elseBranch;
+		}
+
+		<R> R accept(Visitor<R> visitor) {
+			return visitor.visitTernaryExpr(this);
+		}
+
+		final Expr expr;
+		final Expr thenBranch;
+		final Expr elseBranch;
+	}
+
 	static class This extends Expr {
 		This(Token keyword) {
 			this.keyword = keyword;
@@ -154,9 +177,10 @@ abstract class Expr {
 	}
 
 	static class Unary extends Expr {
-		Unary(Token operator, Expr right) {
+		Unary(Token operator, Expr right, Boolean postfix) {
 			this.operator = operator;
 			this.right = right;
+			this.postfix = postfix;
 		}
 	
 
@@ -166,6 +190,7 @@ abstract class Expr {
 
 		final Token operator;
 		final Expr right;
+		final Boolean postfix;
 	}
 
 	static class Variable extends Expr {
@@ -181,10 +206,12 @@ abstract class Expr {
 	}
 
 	static class Assign extends Expr {
-		Assign(Token name, Expr value) {
+		Assign(Token name, Expr value, Token equals) {
 			this.name = name;
 			this.value = value;
+			this.equals = equals;
 		}
+	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitAssignExpr(this);
@@ -192,6 +219,7 @@ abstract class Expr {
 
 		final Token name;
 		final Expr value;
+		final Token equals;
 	}
 
 	static class Function extends Expr {

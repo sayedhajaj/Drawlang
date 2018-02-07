@@ -167,6 +167,16 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Void visitBreakStmt(Stmt.Break stmt) {
+		return null;
+	}
+
+	@Override
+	public Void visitContinueStmt(Stmt.Continue stmt) {
+		return null;
+	}
+
+	@Override
 	public Void visitAssignExpr(Expr.Assign expr) {
 		// resolves any variables the value could refer to
 		resolve(expr.value);
@@ -214,6 +224,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitGetExpr(Expr.Get expr) {
 		resolve(expr.object);
+		if(expr.index != null) resolve(expr.index);
 		return null;
 	}
 
@@ -240,6 +251,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitSetExpr(Expr.Set expr) {
 		resolve(expr.value);
+		if(expr.index != null) resolve(expr.index);
 		resolve(expr.object);
 		return null;
 	}
@@ -271,6 +283,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitUnaryExpr(Expr.Unary expr) {
 		resolve(expr.right);
+		return null;
+	}
+
+	@Override
+	public Void visitTernaryExpr(Expr.Ternary expr) {
+		resolve(expr.expr);
+		resolve(expr.thenBranch);
+		resolve(expr.elseBranch);
 		return null;
 	}
 
