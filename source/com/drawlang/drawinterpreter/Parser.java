@@ -494,7 +494,7 @@ public class Parser {
 		 		if (arguments.size() >= 8) {
 		 			error(peek(), "Cannot have more than 8 arguments.");
 		 		}
-		 		arguments.add(expression());
+		 		arguments.add(assignment());
 		 	} while (match(COMMA));
 		 }
 
@@ -536,6 +536,23 @@ public class Parser {
 
 		if (match(NUMBER, STRING)) {
 			return new Expr.Literal(previous().literal);
+		}
+
+		// checks if array literal, e.g [3, 5, e, x, y]
+		if (match(LEFT_SUB)) {
+			List<Expr> elements = new ArrayList<>();
+			// keeps adding elements to list whilst the next token is a ","
+			if (!check(RIGHT_SUB)) {
+				do {
+					elements.add(assignment());
+				} while(match(COMMA));
+			}
+			consume(RIGHT_SUB, "Expect closing ']'");
+			// creates array and sets elements to expressions
+			DrawArray array = new DrawArray(elements.size());
+			for(int i = 0; i < elements.size(); i++) array.set(i, elements.get(i));
+			// returns it as literal
+			return new Expr.Literal(array);
 		}
 
 		// checks if token is an identifier e.g a variable name

@@ -10,13 +10,14 @@ public class Draw {
 	static boolean hadRuntimeError = false;
 
 	public static void run(String source) {
+		Main.getConsole().clear();
 		hadError = false;
 		hadRuntimeError = false;
 		Scanner scanner = new Scanner(source);
 		List<Token> tokens = scanner.scanTokens();
 		Parser parser = new Parser(tokens);
 		List<Stmt> statements = parser.parse();
-		Interpreter interpreter = new Interpreter();
+		Interpreter interpreter = new Interpreter(new DrawCanvas(Main.getCanvas()));
 
 		if (hadError) return;
 

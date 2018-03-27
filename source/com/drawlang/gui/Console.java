@@ -25,5 +25,9 @@ public class Console extends TextArea {
 	public void println(Object obj) {
 		print(((String)obj)+"\n");
 	}
+
+	public void clear() {
+		setText("");
+	}
 	
 }

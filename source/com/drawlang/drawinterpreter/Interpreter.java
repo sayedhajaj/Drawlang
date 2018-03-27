@@ -3,7 +3,16 @@ package com.drawlang.drawinterpreter;
 import static com.drawlang.drawinterpreter.TokenType.*;
 import com.drawlang.gui.*;
 
+import javafx.scene.paint.*;
+import javafx.scene.image.*;
+import javafx.scene.canvas.*;
+
+import java.awt.image.*;
+import javafx.embed.swing.*;
+import javax.imageio.ImageIO;
+
 import java.util.*;
+import java.io.*;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	
@@ -14,7 +23,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	// and scope where variable is defined
 	private final Map<Expr, Integer> locals = new HashMap<>();
 
-	Interpreter() {
+	private DrawCanvas canvas;
+
+	Interpreter(DrawCanvas canvas) {
+		this.canvas = canvas;
+		canvas.clear();
+
 		globals.define("clock", new DrawCallable() {
 			@Override
 			public int arity() {
@@ -65,6 +79,80 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				return new DrawArray(size);
 			}
 		});
+
+		globals.define("getCanvas", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 0;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return canvas;
+			}
+		});
+
+		globals.define("Canvas", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 2;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return new DrawCanvas(new Canvas((int)(double) arguments.get(0), (int)(double) arguments.get(1)));
+			}
+		});
+
+		globals.define("Color", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 4;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return new DrawColor( new Color(
+					(double)arguments.get(0)/255f, (double) arguments.get(1)/255f, 
+					(double) arguments.get(2)/255f, (double) arguments.get(3)/255f
+					));
+			}
+		});
+
+		globals.define("loadImage", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 1;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				Image image = new Image(new File((String) arguments.get(0)).toURI().toString());
+				return new DrawImage(new WritableImage(image.getPixelReader(), (int)image.getWidth(), (int)image.getHeight()));
+			}
+		}); 
+
+		globals.define("saveImage", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 2;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				// loads the image from the first argument, converts it to a java awt buffered image
+				BufferedImage image = SwingFXUtils.fromFXImage(((DrawImage) arguments.get(0)).image, null);
+				File saveFile = new File((String) arguments.get(1));
+				try {
+					ImageIO.write(image, "png", saveFile);
+				} catch (IOException e) {
+
+				}
+				return null;
+			}
+		});
+
+		globals.define("Math", new DrawMath());
 	}
 
 	void interpret(List<Stmt> statements) {
@@ -79,6 +167,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Object visitLiteralExpr(Expr.Literal expr) {
+		// checks if expression is an array literal
+		if(expr.value instanceof DrawArray) {
+			DrawArray array = (DrawArray) expr.value;
+			// iterates through elements and evaluates them
+			for (int i = 0; i < array.elements.length; i++) {
+				array.set(i, evaluate((Expr) array.elements[i]));
+			}
+		}
+
 		return expr.value;
 	}
 
@@ -516,6 +613,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 				if (left instanceof String && right instanceof String) {
 					return (String)left + (String)right;
+				}
+
+				if (left instanceof String || right instanceof String) {
+					return stringify(left) + stringify(right);
 				}
 
 				throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");

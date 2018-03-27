@@ -3,7 +3,7 @@ package com.drawlang.drawinterpreter;
 import java.util.*;
 
 class DrawArray extends DrawInstance {
-	private final Object[] elements;
+	public final Object[] elements;
 
 	DrawArray(int size) {
 		super(null);

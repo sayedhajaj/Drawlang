@@ -27,8 +27,8 @@ public class DrawTab extends Tab {
 		console = new Console();
 		canvas = new Canvas(640, 480);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-		gc.setFill(Color.WHITE);
-		gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		
 		BorderPane right = new BorderPane();
 		right.setCenter(textArea);
 		right.setBottom(drawButton);
