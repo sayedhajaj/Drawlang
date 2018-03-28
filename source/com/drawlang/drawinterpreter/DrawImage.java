@@ -31,6 +31,15 @@ public class DrawImage extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number, number).");
+						}
+
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						return new DrawImage(new WritableImage(pixelReader, x, y, w, h));
@@ -46,6 +55,13 @@ public class DrawImage extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+						} 
+
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);
 						return new DrawColor(pixelReader.getColor(x, y));
 					}
@@ -61,6 +77,13 @@ public class DrawImage extends DrawInstance {
 
 						@Override
 						public Object call(Interpreter interpreter, List<Object> arguments) {
+							if (
+								!(arguments.get(0) instanceof Double &&
+								arguments.get(1) instanceof Double)
+								) {
+								throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+							} 
+
 							int w = (int)(double)arguments.get(0), h = (int)(double)arguments.get(1);
 							// create image view
 							ImageView imageView = new ImageView(image);
@@ -82,6 +105,12 @@ public class DrawImage extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof DrawColor)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+						} 
+
 						// gets color to be removed
 						Color transparentColor = ((DrawColor)arguments.get(0)).color;
 						WritableImage result = new WritableImage(pixelReader, (int)image.getWidth(), (int)image.getHeight());
@@ -112,6 +141,13 @@ public class DrawImage extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof DrawColor)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+						} 
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);
 						Color color = ((DrawColor) arguments.get(2)).color;
 						pixelWriter.setColor(x, y, color);

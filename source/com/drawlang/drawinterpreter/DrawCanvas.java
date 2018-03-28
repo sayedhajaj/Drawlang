@@ -45,6 +45,16 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						// throws error if arguments are not of type double
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number, number).");
+						}
+
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						context.fillRect(x, y, w, h);
@@ -60,6 +70,14 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+						}
+
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);
 						int radius = (int)(double) arguments.get(2);
 						context.fillOval(x-radius/2, y-radius/2, radius, radius);
@@ -76,6 +94,13 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof String &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(String, number, number).");
+						}
 						String text = (String)arguments.get(0);
 						double x = (double) arguments.get(1), y = (double)arguments.get(2);
 						context.fillText(text, x, y);
@@ -92,6 +117,12 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof DrawArray &&
+							arguments.get(1) instanceof DrawArray)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number[], number[]).");
+						}
 						// takes in the custom draw array and converts it to a double array
 						// for the API to use
 						double[] xPoints = toDoubleArray(((DrawArray) arguments.get(0)).elements);
@@ -113,6 +144,19 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double &&
+							arguments.get(4) instanceof Double &&
+							arguments.get(5) instanceof Double &&
+							arguments.get(6) instanceof String)
+							) {
+							throw new RuntimeError(
+								name, "Expected " + name.lexeme + 
+								"(number, number, number, number, number, number, String).");
+						}
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						double startAngle = (double)arguments.get(4), arcExtent = (double)arguments.get(5);
@@ -131,6 +175,15 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(numner, numner, number, number).");
+						}
+
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						context.strokeRect(x, y, w, h);
@@ -146,6 +199,14 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+						}
+
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);
 						int radius = (int)(double) arguments.get(2);
 						context.strokeOval(x-radius/2, y-radius/2, radius, radius);
@@ -162,6 +223,13 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof DrawArray &&
+							arguments.get(1) instanceof DrawArray)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number[], number[]).");
+						}
+
 						double[] xPoints = toDoubleArray(((DrawArray) arguments.get(0)).elements);
 						double[] yPoints = toDoubleArray(((DrawArray) arguments.get(1)).elements);
 						int size = xPoints.length < yPoints.length ? xPoints.length : yPoints.length;
@@ -179,6 +247,15 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number, number).");
+						}
+
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int endX = (int)(double)arguments.get(2), endY = (int)(double)arguments.get(3);
 						// gets start and end coordinates and uses them to draw a line			
@@ -195,6 +272,13 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof DrawArray &&
+							arguments.get(1) instanceof DrawArray)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number[], number[]).");
+						}
+
 						double[] xPoints = toDoubleArray(((DrawArray) arguments.get(0)).elements);
 						double[] yPoints = toDoubleArray(((DrawArray) arguments.get(1)).elements);
 						int size = xPoints.length < yPoints.length ? xPoints.length : yPoints.length;
@@ -213,6 +297,21 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double &&
+							arguments.get(4) instanceof Double &&
+							arguments.get(5) instanceof Double &&
+							arguments.get(6) instanceof String)
+							) {
+							throw new RuntimeError(
+								name, "Expected " + name.lexeme + 
+								"(number, number, number, number, number, number, String).");
+
+						}
+
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						double startAngle = (double)arguments.get(4), arcExtent = (double)arguments.get(5);
@@ -231,6 +330,13 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof DrawImage &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(Image, number, number).");
+						}
 						int x = (int)(double) arguments.get(1), y = (int)(double)arguments.get(2);
 						Image image = ((DrawImage) arguments.get(0)).image;
 						context.drawImage(image, x, y);
@@ -260,6 +366,10 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						// throws error if argument is not of type DrawColor
+						if (!(arguments.get(0) instanceof DrawColor))
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(Color).");
+
 						Color color = ((DrawColor)arguments.get(0)).color;
 						context.setFill(color);
 						context.setStroke(color);
@@ -275,6 +385,9 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (!(arguments.get(0) instanceof Double)) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number).");
+						}
 						context.setLineWidth((double)arguments.get(0));
 						return null;
 					}
@@ -288,6 +401,14 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof DrawColor)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, Color).");
+						}
+
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);
 						Color color = ((DrawColor) arguments.get(2)).color;
 						pixelWriter.setColor(x, y, color);
@@ -365,6 +486,12 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number).");
+						}
 						double x = (double) arguments.get(0), y = (double)arguments.get(1);
 						context.moveTo(x, y);
 						return null;
@@ -381,6 +508,13 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number).");
+						}
+
 						double x = (double) arguments.get(0), y = (double)arguments.get(1);
 						context.lineTo(x, y);
 						return null;
@@ -398,6 +532,15 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number, number).");
+						}
+
 						double xControl = (double) arguments.get(0), yControl = (double)arguments.get(1);
 						double xEnd = (double) arguments.get(2), yEnd = (double)arguments.get(3);
 						context.quadraticCurveTo(xControl, yControl, xEnd, yEnd);
@@ -416,6 +559,17 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double &&
+							arguments.get(4) instanceof Double &&
+							arguments.get(5) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + 
+								"(number, number, number number, number, number).");
+						}
 						double xControl = (double) arguments.get(0), yControl = (double)arguments.get(1);
 						double xControl2 = (double) arguments.get(2), yControl2 = (double)arguments.get(3);
 						double xEnd = (double) arguments.get(4), yEnd = (double)arguments.get(5);
@@ -433,6 +587,17 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double &&
+							arguments.get(4) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + 
+								"(number, number, number, number, number).");
+						}
+
 						double x1 = (double) arguments.get(0), y1 = (double)arguments.get(1);
 						double x2 = (double) arguments.get(2), y2 = (double)arguments.get(3);
 						double radius = (double) arguments.get(4);
@@ -450,6 +615,17 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						if (
+							!(arguments.get(0) instanceof Double &&
+							arguments.get(1) instanceof Double &&
+							arguments.get(2) instanceof Double &&
+							arguments.get(3) instanceof Double &&
+							arguments.get(4) instanceof Double &&
+							arguments.get(5) instanceof Double)
+							) {
+							throw new RuntimeError(name, "Expected " + name.lexeme + 
+								"(number, number, number, number, number, number).");
+						}
 						double centerX = (double) arguments.get(0), centerY = (double)arguments.get(1);
 						double radiusX = (double) arguments.get(2), radiusY = (double)arguments.get(3);
 						double startAngle = (double) arguments.get(4), length = (double)arguments.get(5);
