@@ -1,0 +1,21 @@
+/*makes source-code text-area have a light background and light border*/
+.code-text-area, .code-text-area .content {
+	-fx-background-color: #f8f8f8;
+	-fx-border-color: #d8d8d8;
+}
+
+/*makes tab pane light grey*/
+.tab-pane .tab-header-area .tab-header-background {
+	-fx-background-color: #d8d8d8;
+}
+
+/*makes tab light grey*/
+.tab {
+	-fx-background-color: #b8b8b8;
+}
+
+/*makes selected tab white*/
+.tab:selected {
+	-fx-background-color: #f8f8f8;
+}
+

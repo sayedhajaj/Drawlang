@@ -203,7 +203,10 @@ public class Scanner {
 		// this trims the surrounding quotes and uses the start and current
 		// variables to add multiple characters
 		String value = source.substring(start+1, current-1);
-		addToken(STRING, value);
+		// this adds a wrapper around the string
+		// which is useful for letting all strings have
+		// string methods by default
+		addToken(STRING, new DrawString(value));
 	}
 
 	// this is similar to advance but it only advances if the next character in the source

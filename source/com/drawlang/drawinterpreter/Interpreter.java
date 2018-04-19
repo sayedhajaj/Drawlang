@@ -24,10 +24,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	private final Map<Expr, Integer> locals = new HashMap<>();
 
 	private DrawCanvas canvas;
+	private DrawMath math;
 
 	Interpreter(DrawCanvas canvas) {
 		this.canvas = canvas;
 		canvas.clear();
+		math = new DrawMath();
 
 		globals.define("clock", new DrawCallable() {
 			@Override
@@ -38,6 +40,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
 				return (double)System.currentTimeMillis();
+			}
+		});
+
+		globals.define("str", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 1;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return new DrawString(stringify(arguments.get(0)));
 			}
 		});
 
@@ -152,7 +166,35 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			}
 		});
 
-		globals.define("Math", new DrawMath());
+		// returns instance of list data structure - a wrapper
+		// around java's arraylist
+		globals.define("List", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 0;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return new DrawList();
+			}
+		});
+
+		// returns instance of map data structure - a wrapper
+		// around java's hashmap
+		globals.define("Map", new DrawCallable() {
+			@Override
+			public int arity() {
+				return 0;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, List<Object> arguments) {
+				return new DrawMap();
+			}
+		});
+
+		globals.define("Math", math);
 	}
 
 	void interpret(List<Stmt> statements) {
@@ -343,7 +385,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	private boolean isEqual(Object a, Object b) {
 		if (a == null && b == null) return true;
 		if (a == null) return false;
-
+		if(a instanceof DrawString) a = ((DrawString)a).toString();
+		if(b instanceof DrawString) b = ((DrawString)b).toString();
+		if(a instanceof DrawChar) a = ((DrawChar)a).toString();
+		if(b instanceof DrawChar) b = ((DrawChar)b).toString();
 		return a.equals(b);
 	}
 
@@ -521,13 +566,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				}
 
 				// if both strings concatenate and return
-				else if (value instanceof String && current instanceof String) {
-					value = (String)current + (String)value;
+				else if (value instanceof DrawString && current instanceof DrawString) {
+					value = new DrawString(current.toString() + value.toString());
 				}
 
 				// if only one is string convert both and concatenate
-				else if (value instanceof String || current instanceof String) {
-					value = stringify(current) + stringify(value);
+				else if (value instanceof DrawString || current instanceof DrawString) {
+					value = new DrawString(stringify(current) + stringify(value));
 				}
 
 			 	break;
@@ -610,13 +655,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				if (left instanceof Double && right instanceof Double) {
 					return (double)left + (double)right;
 				}
-
-				if (left instanceof String && right instanceof String) {
-					return (String)left + (String)right;
+				if (left instanceof DrawString && right instanceof DrawString) {
+					return new DrawString((String)left.toString() + (String)right.toString());
 				}
-
-				if (left instanceof String || right instanceof String) {
-					return stringify(left) + stringify(right);
+				if (left instanceof DrawString || right instanceof DrawString) {
+					return new DrawString(stringify(left) + stringify(right));
 				}
 
 				throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");

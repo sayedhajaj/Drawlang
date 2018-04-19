@@ -1,3 +1,10 @@
 .text-area:readonly .content {
 	-fx-background-color: rgb(230, 230, 230);
+	-fx-border-color: #d8d8d8;
+	-fx-border-radius: 5;
+}
+
+.button {
+	-fx-background-color: limegreen;
+	-fx-border-color: #d8d8d8;
 }

@@ -95,13 +95,13 @@ class DrawCanvas extends DrawInstance {
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
 						if (
-							!(arguments.get(0) instanceof String &&
+							!(arguments.get(0) instanceof DrawString &&
 							arguments.get(1) instanceof Double &&
 							arguments.get(2) instanceof Double)
 							) {
 							throw new RuntimeError(name, "Expected " + name.lexeme + "(String, number, number).");
 						}
-						String text = (String)arguments.get(0);
+						String text = ((DrawString)arguments.get(0)).toString();
 						double x = (double) arguments.get(1), y = (double)arguments.get(2);
 						context.fillText(text, x, y);
 						return null;

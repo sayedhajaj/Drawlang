@@ -14,12 +14,13 @@ public class Console extends TextArea {
 	public Console() {
 		super();
 		setEditable(false);
+		getStyleClass().add("console");
 		// setFocusTraversable(false);
 		// setMouseTransparent(true);
 	}
 
 	public void print(Object obj) {
-		setText(getText() + (String)obj);
+		appendText((String)obj);
 	}
 
 	public void println(Object obj) {
