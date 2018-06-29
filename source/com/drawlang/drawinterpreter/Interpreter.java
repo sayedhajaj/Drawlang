@@ -141,7 +141,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				Image image = new Image(new File((String) arguments.get(0)).toURI().toString());
+				String path = ((DrawString) arguments.get(0)).toString();
+				Image image = new Image(new File(path).toURI().toString());
 				return new DrawImage(new WritableImage(image.getPixelReader(), (int)image.getWidth(), (int)image.getHeight()));
 			}
 		}); 
@@ -155,10 +156,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
 				// loads the image from the first argument, converts it to a java awt buffered image
-				BufferedImage image = SwingFXUtils.fromFXImage(((DrawImage) arguments.get(0)).image, null);
-				File saveFile = new File((String) arguments.get(1));
+				String path = ((DrawString) arguments.get(1)).toString();
+				File saveFile = new File((String) path);
 				try {
-					ImageIO.write(image, "png", saveFile);
+					ImageIO.write(SwingFXUtils.fromFXImage(((DrawImage) arguments.get(0)).image, null), "png", saveFile);
 				} catch (IOException e) {
 
 				}

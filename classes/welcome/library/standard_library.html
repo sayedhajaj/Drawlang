@@ -1,0 +1,225 @@
+<head>
+	<style type="text/css">
+		* {
+			padding-left: 5;
+		}
+
+		a {
+			color: inherit;
+			text-decoration: inherit;
+		}
+
+		#contents {
+			margin-left: 10;
+			padding-left: 10;
+
+		}
+
+		li {
+			list-style-position: inside;
+		}
+
+	</style>
+
+</head>
+
+<body>
+	<h1>Standard Library</h1>
+	<div id="contents">
+		<h2>Contents</h2>
+		<ul>
+			<li><a href="#Global-Functions">Global Functions</a></li>
+			<li><a href="#Maths">Maths</a></li>
+			<li>
+				<a href="#Data-Structures">Data Structures</a>
+				<ul>
+					<li><a href="#Arrays">Arrays</a></li>
+					<li><a href="#Characters">Characters</a></li>
+					<li><a href="#Lists">Lists</a></li>
+					<li><a href="#Maps">Maps</a></li>
+					<li><a href="#Strings">Strings</a></li>
+				</ul>
+			</li>
+			<li>
+				<a href="#Graphics">Graphics</a>
+				<ul>
+					<li><a href="#Color">Color</a></li>
+					<li><a href="#Image">Image</a></li>
+					<li><a href="#Canvas">Canvas</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<br>
+
+	<h3 id="Global-Functions">Global functions</h3>
+	<ul>
+		<li><code>clock()</code> - Gets the current time in milliseconds.</li>
+		<li><code>str(x)</code> - Changes input to string representation.</li>
+		<li><code>print(x)</code> - Prints input to console.</li>
+		<li><code>println(x)</code> - Prints input to console and adds new line.</li>
+		<li><code>Array(size)</code> - Creates an array instance with the size of the input.</li>
+		<li><code>getCanvas()</code> - Returns reference to editor canvas.</li>
+		<li><code>Canvas(width, height)</code> - Returns a reference to new canvas instance.</li>
+		<li><code>Color(red, green, blue, alpha)</code> - Creates a new color instance with given rgba values.</li>
+		<li><code>loadImage(pathString)</code> - Loads an image from given path string and returns image instance.</li>
+		<li><code>saveImage(image, pathString)</code> - Saves image to given path.</li>
+		<li><code>List()</code> - Returns empty list instance.</li>
+		<li><code>Map()</code> - Returns emtpy Map instance</li>
+	</ul>
+	<br>
+
+	<h3 id="Maths">Maths</h3>
+	<ul>
+		<li><code>Math.abs(num)</code> - Returns absolute value (no negative sign) of input.</li>
+		<li><code>Math.acos(num)</code> - Returns inverse cosine of input.</li>
+		<li><code>Math.asin(num)</code> - Returns inverse sine of input.</li>
+		<li><code>Math.cbrt(num)</code> - Returns cube root of input.</li>
+		<li><code>Math.ceil(num)</code> - Returns closest whole number that is greater than or equal to input.</li>
+		<li><code>Math.cos(num)</code> - Returns cosine of input.</li>
+		<li><code>Math.exp(num)</code> - Returns e to the power of input.</li>
+		<li><code>Math.floor(num)</code> - Returns closet whole number that is smaller than or equal to input.</li>
+		<li><code>Math.hypot(x, y)</code> - Returns hypotenuse given the two other sides.</li>
+		<li><code>Math.ln(num)</code> - Returns natural log (base e) of input.</li>
+		<li><code>Math.log(base, result)</code> - Returns power given base and result using logs.</li>
+		<li><code>Math.log10(num)</code> - Returns base 10 log of input.</li>
+		<li><code>Math.max(a, b)</code> - Returns biggest value given two numbers.</li>
+		<li><code>Math.min(a, b)</code> - Returns smallest value given two numbers.</li>
+		<li><code>Math.pow(a, b)</code> - Returns value of first argument raised to the power of the second argument.</li>
+		<li><code>Math.random()</code> - Returns random value between 0 and 1.</li>
+		<li><code>Math.round(num)</code> - Returns closest whole number to input.</li>
+		<li><code>Math.sin(num)</code> - Returns sine of input.</li>
+		<li><code>Math.sqrt(num)</code> - Returns positive square root of input.</li>
+		<li><code>Math.tan(num)</code> - Returns trigonometric tangent of input.</li>
+		<li><code>Math.toDegrees(num)</code> - Converts from radians to degrees.</li>
+		<li><code>Math.toRadians(num)</code> - Converts from degrees to radians.</li>
+		<li><code>Math.E</code> - Returns exponential constant.</li>
+		<li><code>Math.PI</code> - Returns PI.</li>
+	</ul>
+	<br>
+
+	<h3 id="Data-Structures">Data Structures</h3>
+
+	<h4 id="Arrays">Arrays</h4>
+	<ul>
+		<li><code>map(function)</code> 
+			- Returns a new array comprised of values return from calling function on every element in array.
+		</li>
+		<li><code>length</code> - Returns length of array.</li>
+	</ul>
+	<br>
+
+	<h4 id="Characters">Characters</h4>
+	<ul>
+		<li><code>toAscii()</code> - Returns ascii value of character.</li>
+	</ul>
+	<br>
+
+	<h4 id="Lists">Lists</h4>
+	<ul>
+		<li><code>add(value)</code> - Adds value to end of list.</li>
+		<li><code>addTo(index, value)</code> - Inserts specified element in specified position in list.</li>
+		<li><code>clear()</code> - Empties list.</li>
+		<li><code>get(index)</code> - Returns element at the specified index in list.</li>
+		<li><code>remove(index)</code> - Removes element at the specified postion in list and returns it.</li>
+		<li><code>size()</code> - Returns size of list.</li>
+		<li><code>toArray()</code> - Returns an array containing all the elements in list.</li>
+	</ul>
+	<br>
+
+	<h4 id="Maps">Maps</h4>
+	<ul>
+		<li><code>containsKey(key)</code> - Returns true if map contains a mapping for specified key.</li>
+		<li><code>clear()</code> - Empties map.</li>
+		<li><code>entries()</code> - Returns array of mappings contained in map.</li>
+		<li><code>get(key)</code> - Returns value to which the specified key is mapped.</li>
+		<li><code>keys()</code> - Returns array of keys contained within map.</li>
+		<li><code>put(key, value)</code> - Associates specified key with specified value in map.</li>
+		<li><code>remove(key)</code> - Removes entry for specified key and returns it.</li>
+		<li><code>values()</code> - Returns array of values in map.</li>
+	</ul>
+	<br>
+
+	<h4 id="Strings">Strings</h4>
+	<ul>
+		<li><code>charAt(index)</code> - Returns character located at given index in string.</li>
+		<li><code>substring(start, end)</code> - Returns new string that is a substring of this string.</li>
+		<li><code>length</code> - Returns length of string.</li>
+	</ul>
+	<br>
+
+	<h3>Graphics</h3>
+
+	<h4 id="Color">Color</h4>
+	<ul>
+		<li><code>r</code> - Returns red value of color.</li>
+		<li><code>g</code> - Returns green value of color.</li>
+		<li><code>b</code> - Returns blue value of color.</li>
+		<li><code>a</code> - Returns alpha value of color.</li>
+	</ul>
+	<br>
+
+	<h4 id="Image">Image</h4>
+	<ul>
+		<li><code>getPixel(x, y)</code> - Returns color value of image at specified coordinates.</li>
+		<li><code>getSubimage(x, y, width, height)</code> - Returns subimage defined by specified rectangular region.</li>
+		<li><code>resizeImage(width, height)</code> - Returns resized version of image.</li>
+		<li><code>setPixel(color, x, y)</code> - Sets pixel value of image at specified coordinates.</li>
+		<li><code>setTransparentColor(color)</code> - Makes specified color transparent in image.</li>
+		<li><code>width</code> - Returns width of image.</li>
+		<li><code>height</code> - Returns height of image.</li>
+	</ul>
+	<br>
+	<h4 id="Canvas">Canvas</h4>
+	<ul>
+		<li>
+			<code>arc(centerX, centerY, radiusX, radiusY, startAngle, length)</code>
+			 - Creates arc from current path that uses Euclidean degrees.
+		</li>
+		<li><code>arcTo(x1, y1, x2, y2, radius)</code> - Creats arc from current path.</li>
+		<li><code>beginPath()</code> - Resets current path to empty.</li>
+		<li>
+			<code>bezierCurveTo(xControl, yControl, xControl2, yControl2, xEnd, yEnd)</code> 
+			- Creates cubic bezier curve from path postion to given end position using specified control positions.
+		</li>
+		<li><code>clear()</code> - Makes canvas transparent.</li>
+		<li><code>closePath()</code> - Closes the path.</li>
+		<li>
+			<code>drawArc(x, y, width, height, startAngle, arcExtent, artType)</code> 
+			- Draws an arc using current color. All of the parameters are numerical with the exception of the last one,
+			which is a string that can only take the following values: ROUND, CHORD, OPEN.
+		</li>
+		<li><code>drawCircle(x, y, radius)</code> - Draws a circle with given position and radius using current color.</li>
+		<li><code>drawImage(image, x, y)</code> - Draws image instance onto canvas at specified position.</li>
+		<li><code>drawLine(x, y, endX, endY)</code> - Draws a line between given points using current color.</li>
+		<li><code>drawPath()</code> - Outlines path with current color.</li>
+		<li><code>drawPolygon(xArray, yArray)</code> - Draws a polygon with the given points using current color.</li>
+		<li><code>drawPolyline(xArray, yArray)</code> - Draws a polyline with given points using current color.</li>
+		<li><code>drawRect(x, y, width, height)</code> - Draws a rectangle with current color.</li>
+		<li>
+			<code>fillArc(x, y, width, height, startAngle, arcExtent, artType)</code> 
+			- Fills an arc using current color. All of the parameters are numerical with the exception of the last one,
+			which is a string that can only take the following values: ROUND, CHORD, OPEN.
+		</li>
+		<li><code>fillCircle(x, y, radius)</code> - Fills a circle with given position and radius using current color.</li>
+		<li><code>fillPath()</code> - Fills path with current color.</li>
+		<li><code>fillPolygon(xArray, yArray)</code> - Fills a polygon with the given points using current color.</li>
+		<li><code>fillRect(x, y, width, height)</code> - Fills a rectangle with current color.</li>
+		<li><code>fillText(string, x, y)</code> - Fills given text at given position using current color.</li>
+		<li><code>lineTo(x, y)</code> - Creates line from current path to given position.</li>
+		<li><code>moveTo(x, y)</code> - Moves path to given coordinates.</li>
+		<li>
+			<code>quadraticCurveTo(xControl, yControl, xEnd, yEnd)</code> 
+			- Creates quadratic bezier curve from path position to given end position using specified control position.
+		</li>
+		<li><code>setColor(color)</code> - Sets current color.</li>
+		<li><code>setLineWidth(num)</code> - Sets the current line width.</li>
+		<li><code>setPixel(x, y, color)</code> - Sets color of specified point.</li>
+		<li><code>toImage()</code> - Returns image representation of canvas.</li>
+	</ul>
+	<br>
+
+	<a href="../index.html">Welcome</a>
+	
+</body>
+

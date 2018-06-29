@@ -59,7 +59,7 @@ public class DrawImage extends DrawInstance {
 							!(arguments.get(0) instanceof Double &&
 							arguments.get(1) instanceof Double)
 							) {
-							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number, number).");
+							throw new RuntimeError(name, "Expected " + name.lexeme + "(number, number).");
 						} 
 
 						int x = (int)(double) arguments.get(0), y = (int)(double)arguments.get(1);

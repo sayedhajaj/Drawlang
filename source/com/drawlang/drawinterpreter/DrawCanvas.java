@@ -151,7 +151,7 @@ class DrawCanvas extends DrawInstance {
 							arguments.get(3) instanceof Double &&
 							arguments.get(4) instanceof Double &&
 							arguments.get(5) instanceof Double &&
-							arguments.get(6) instanceof String)
+							arguments.get(6) instanceof DrawString)
 							) {
 							throw new RuntimeError(
 								name, "Expected " + name.lexeme + 
@@ -160,7 +160,7 @@ class DrawCanvas extends DrawInstance {
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						double startAngle = (double)arguments.get(4), arcExtent = (double)arguments.get(5);
-						String arcType = (String) arguments.get(6);
+						String arcType = (String) arguments.get(6).toString();
 						ArcType closure = ArcType.valueOf(arcType);
 						context.fillArc(x, y, w, h, startAngle, arcExtent, closure);
 						return null;
@@ -304,7 +304,7 @@ class DrawCanvas extends DrawInstance {
 							arguments.get(3) instanceof Double &&
 							arguments.get(4) instanceof Double &&
 							arguments.get(5) instanceof Double &&
-							arguments.get(6) instanceof String)
+							arguments.get(6) instanceof DrawString)
 							) {
 							throw new RuntimeError(
 								name, "Expected " + name.lexeme + 
@@ -315,7 +315,7 @@ class DrawCanvas extends DrawInstance {
 						int x = (int)(double)arguments.get(0), y = (int)(double)arguments.get(1);
 						int w = (int)(double)arguments.get(2), h = (int)(double)arguments.get(3);
 						double startAngle = (double)arguments.get(4), arcExtent = (double)arguments.get(5);
-						String arcType = (String) arguments.get(6);
+						String arcType = (String) arguments.get(6).toString();
 						ArcType closure = ArcType.valueOf(arcType);
 						context.strokeArc(x, y, w, h, startAngle, arcExtent, closure);
 						return null;

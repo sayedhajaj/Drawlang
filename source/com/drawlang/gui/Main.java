@@ -11,6 +11,7 @@ import javafx.scene.input.*;
 import javafx.stage.*;
 import javafx.geometry.*;
 import javafx.scene.control.ButtonBar.*;
+import javafx.scene.web.*;
 
 import java.nio.file.*;
 import java.io.*;
@@ -21,6 +22,8 @@ public class Main extends Application {
 	private static Stage window;
 	private static TabPane tabPane;
 	private Scene scene;
+	private WebView webView;
+	private WebEngine webEngine;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -36,6 +39,11 @@ public class Main extends Application {
 		tabPane = new TabPane();
 		for (int i = 0; i < 5; i++)
 			tabPane.getTabs().add(new DrawTab("untitled", ""));
+
+		// creates webview, adds welcome tab to tab pane
+		webView = new WebView();
+		webEngine = webView.getEngine();
+		createWelcomeTab();
 
 		BorderPane layout = new BorderPane();
 		layout.setTop(menuBar);
@@ -318,6 +326,7 @@ public class Main extends Application {
 
 		Menu helpMenu = new Menu("_Help");
 		MenuItem welcomeItem = new MenuItem("Welcome");
+		welcomeItem.setOnAction(e-> createWelcomeTab());
 		helpMenu.getItems().add(welcomeItem);
 
 		menuBar.getMenus().addAll(fileMenu, editMenu, preferencesMenu, helpMenu);
@@ -367,5 +376,16 @@ public class Main extends Application {
 		while (--n > 0 && index != -1)
 			index = string.indexOf(substring, index + 1);
 		return index;
+	}
+
+	public void createWelcomeTab() {
+		// loads welcome page html
+		webEngine.load(this.getClass().getResource("/welcome/index.html").toString());
+		// creates new tab and puts the webview contents in the tab
+		Tab welcomeTab = new Tab("Welcome");
+		welcomeTab.setContent(webView);
+		// adds tab to tab pane and selects it
+		tabPane.getTabs().add(welcomeTab);
+		tabPane.getSelectionModel().select(welcomeTab);
 	}
 }

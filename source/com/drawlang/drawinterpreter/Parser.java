@@ -670,6 +670,8 @@ public class Parser {
 				case IF:
 				case WHILE:
 				case RETURN:
+				case BREAK:
+				case CONTINUE:
 					return;
 			}
 			advance();

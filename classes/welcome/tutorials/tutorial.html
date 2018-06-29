@@ -1,0 +1,106 @@
+<head>
+
+	<style type="text/css">
+		* {
+			padding-left: 5;
+		}
+
+		a {
+			color: inherit;
+			text-decoration: inherit;
+		}
+
+		#contents {
+			margin-left: 10;
+			padding-left: 10;
+
+		}
+
+		li {
+			list-style-position: inside;
+		}
+
+	</style>
+
+</head>
+
+<body>
+	<h1>Tutorials</h1>
+	<h2>Contents</h2>
+	<div id="contents">
+	<ul>
+		<li><a href="#modern-art">Modern Art</a></li>
+	</ul>
+	</div>
+	<br>
+
+	<h3 id="modern-art">Modern Art</h3>
+	<p>
+		In this tutorial, we will be rendering over a thousand rectangles with random colors at random positions.
+		We will start with rendering one, red square. Open a new editor tab, and type the following code.
+	</p>
+	<pre>
+		<code>
+var canvas = getCanvas();
+canvas.setColor(Color(255, 0, 0, 255));
+canvas.fillRect(100, 100, 100, 100);
+		</code>
+	</pre>
+
+	<p>
+		The first line gets references to canvas instance associated the current with current tab.
+		The second one sets the current color to red. Color takes in red, blue, green, alpha (see library).
+		The third line draws a square with size 100 and at coordinates (100, 100) - where (0, 0) is the top left.
+	</p>
+
+	<p>If you enter this correctly, this should be the output.</p>
+	<img src="rect.png"><br>
+
+	<p>
+		Now we will modify this so that it renders 5 squares at different positions.
+	</p>
+		<pre>
+		<code>
+var canvas = getCanvas();
+canvas.setColor(Color(255, 0, 0, 255));
+for (var i = 0; i < 5; i++) {	
+	canvas.fillRect(100*i, 400-50*i, 40, 40);
+}
+		</code>
+	</pre>
+
+	<p>
+
+	</p>This now draws multiple squares using a loop. It uses the loop index to decide the coordinates.
+
+	<img src="5_rects.png"><br>
+
+	<p>
+		And, finally, we will make it draw randomly size rectangles, at random positions, with random colors.
+		We will do this using <code>Math.random()</code>.
+	</p>
+	<pre>
+		<code>
+var canvas = getCanvas();
+canvas.setColor(Color(255, 0, 0, 255));
+for (var i = 0; i < 1225; i++) {	
+	var r = Math.random() * 255;
+	var g = Math.random() * 255;
+	var b = Math.random() * 255;
+	canvas.setColor(Color(r, g, b, 255));
+
+	var x = Math.random() * 500;
+	var y = Math.random() * 400;
+	var w = Math.random() * 100;
+	var h = Math.random() * 100;
+	canvas.fillRect(x, y, w, h);
+}
+		</code>
+	</pre>
+
+	<img src="modern_art.png"><br><br>
+
+	<a href="../index.html">Welcome</a>
+	
+</body>
+

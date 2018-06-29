@@ -112,8 +112,10 @@ public class DrawTab extends Tab {
 	}
 
 	private WritableImage getImage() {
+		SnapshotParameters sp = new SnapshotParameters();
+		sp.setFill(Color.TRANSPARENT);
 		WritableImage image = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-		canvas.snapshot(null, image);
+		canvas.snapshot(sp, image);
 		return image;
 	}
 

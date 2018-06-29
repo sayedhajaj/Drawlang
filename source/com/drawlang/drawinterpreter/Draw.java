@@ -15,6 +15,7 @@ public class Draw {
 		hadRuntimeError = false;
 		Scanner scanner = new Scanner(source);
 		List<Token> tokens = scanner.scanTokens();
+		if (hadError) return;
 		Parser parser = new Parser(tokens);
 		List<Stmt> statements = parser.parse();
 		Interpreter interpreter = new Interpreter(new DrawCanvas(Main.getCanvas()));

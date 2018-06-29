@@ -1,0 +1,108 @@
+<head>
+	<style type="text/css">
+		* {
+			padding-left: 5;
+		}
+
+		a {
+			color: inherit;
+			text-decoration: inherit;
+		}
+
+		#contents {
+			margin-left: 10;
+			padding-left: 10;
+
+		}
+
+		li {
+			list-style-position: inside;
+		}
+
+	</style>
+</head>
+
+<body>
+	<h1>Language documentation</h1>
+	<h2>Contents</h2>
+	<div id="contents">
+		<ul>
+			<li><a href="#Variables">Variables</a></li>
+		</ul>
+		<ul>
+			<li><a href="#If">If</a></li>
+		</ul>
+		<ul>
+			<li><a href="#While">While</a></li>
+		</ul>
+		<ul>
+			<li><a href="#For">For</a></li>
+		</ul>
+		<ul>
+			<li><a href="#Functions">Functions</a></li>
+		</ul>
+		<ul>
+			<li><a href="#Classes">Classes</a></li>
+		</ul>
+		<ul>
+			<li><a href="#Inheritance">Inheritance</a></li>
+		</ul>
+	</div>
+	<br>
+
+	<h3 id="Variables">Variables</h3>
+	<p>
+		Variables are declared like so: <code>var message = "hello";</code><br>
+		Variables can also be declared without being given a value immediately.<br>
+		<code>var message; <br>message = "hello";</code>
+	</p>
+
+	<h3 id="If">If</h3>
+	<p>
+		The syntax of it looks like this:
+	<pre>
+		<code>
+var age = 17;
+if (age >= 18) {
+	// perform action
+} else if (age == 16) {
+	// perform alternate action
+} else {
+	// perform some other action
+}
+		</code>
+	</pre>
+	</p>
+
+	<h3 id="While">While</h3>
+	<pre>
+		<code>
+var index = 0;
+while (index < 10) {
+	index++;
+	// perform action
+}
+		</code>
+	</pre>
+
+	<h3 id="For">For</h3>
+	<pre>
+		<code>
+for (var i = 0; i < 10; i++) {
+	// perform action
+}
+		</code>
+	</pre>
+
+	<h3 id="Function">Functions</h3>
+	<pre>
+		<code>
+function factorial(num) {
+	return num <= 1 ? 1 : num * factorial(num-1);
+}
+		</code>
+	</pre>
+
+	<a href="../index.html">Welcome</a>
+	
+</body>
