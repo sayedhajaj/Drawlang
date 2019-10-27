@@ -4,6 +4,7 @@ import javafx.scene.canvas.*;
 import javafx.scene.paint.*;
 import javafx.scene.shape.*;
 import javafx.scene.image.*;
+import javafx.scene.*;
 
 import java.util.*;
 
@@ -352,8 +353,10 @@ class DrawCanvas extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
+						SnapshotParameters sp = new SnapshotParameters();
+						sp.setFill(Color.TRANSPARENT);
 						WritableImage result = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-						canvas.snapshot(null, result);
+						canvas.snapshot(sp, result);
 						return new DrawImage(result);
 					}
 				};
