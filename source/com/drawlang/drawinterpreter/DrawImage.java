@@ -2,6 +2,7 @@ package com.drawlang.drawinterpreter;
 
 import javafx.scene.paint.*;
 import javafx.scene.image.*;
+import javafx.scene.*;
 
 import java.util.*;
 
@@ -91,7 +92,9 @@ public class DrawImage extends DrawInstance {
 							imageView.setFitWidth(w);
 							imageView.setFitHeight(h);
 							// convert image view to image
-							return new DrawImage(new WritableImage(imageView.snapshot(null, null).getPixelReader(), w, h));
+							SnapshotParameters sp = new SnapshotParameters();
+							sp.setFill(Color.TRANSPARENT);
+							return new DrawImage(new WritableImage(imageView.snapshot(sp, null).getPixelReader(), w, h));
 						}
 					};
 
