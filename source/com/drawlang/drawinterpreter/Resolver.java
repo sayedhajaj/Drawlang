@@ -2,6 +2,8 @@ package com.drawlang.drawinterpreter;
 
 import java.util.*;
 
+import com.drawlang.drawinterpreter.Expr.ArrayLiteral;
+
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	private final Interpreter interpreter;
 	// keeps track of scopes that are currently in scope, the string is
@@ -15,16 +17,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	}
 
 	private enum FunctionType {
-		NONE,
-		FUNCTION,
-		INITIALIZER,
-		METHOD
+		NONE, FUNCTION, INITIALIZER, METHOD
 	}
 
 	private enum ClassType {
-		NONE,
-		CLASS,
-		SUBCLASS
+		NONE, CLASS, SUBCLASS
 	}
 
 	private ClassType currentClass = ClassType.NONE;
@@ -100,7 +97,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 		endScope();
 
-		if (stmt.superclass != null) endScope();
+		if (stmt.superclass != null)
+			endScope();
 
 		currentClass = enclosingClass;
 		return null;
@@ -128,7 +126,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		resolve(stmt.condition);
 		resolve(stmt.thenBranch);
 		// checks if else branch exists
-		if (stmt.elseBranch != null) resolve(stmt.elseBranch);
+		if (stmt.elseBranch != null)
+			resolve(stmt.elseBranch);
 		return null;
 	}
 
@@ -224,7 +223,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitGetExpr(Expr.Get expr) {
 		resolve(expr.object);
-		if(expr.index != null) resolve(expr.index);
+		if (expr.index != null)
+			resolve(expr.index);
 		return null;
 	}
 
@@ -251,7 +251,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitSetExpr(Expr.Set expr) {
 		resolve(expr.value);
-		if(expr.index != null) resolve(expr.index);
+		if (expr.index != null)
+			resolve(expr.index);
 		resolve(expr.object);
 		return null;
 	}
@@ -298,7 +299,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	public Void visitVariableExpr(Expr.Variable expr) {
 		// if variable is declared but not inialized - e.g var a; a = a;
 		if (!scopes.isEmpty() && scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
-			Draw.error(expr.name,  "Cannot read local variable in its own initializer.");
+			Draw.error(expr.name, "Cannot read local variable in its own initializer.");
 		}
 
 		resolveLocal(expr, expr.name);
@@ -324,19 +325,21 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 	private void declare(Token name) {
 		// if it's global then there is no need to resolve this
-		if (scopes.isEmpty()) return;
+		if (scopes.isEmpty())
+			return;
 
 		// adds to innermost scope to shadow outer variables
 		Map<String, Boolean> scope = scopes.peek();
 		// raises error if redeclaring variable with same name in
 		// same scope
-		if (scope.containsKey(name.lexeme)) 
-			Draw.error(name,"Variable with this name already declared in this scope.");
+		if (scope.containsKey(name.lexeme))
+			Draw.error(name, "Variable with this name already declared in this scope.");
 		scope.put(name.lexeme, false);
 	}
 
 	private void define(Token name) {
-		if (scopes.isEmpty()) return;
+		if (scopes.isEmpty())
+			return;
 		scopes.peek().put(name.lexeme, true); // true marks it as initialized
 	}
 
@@ -345,7 +348,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		// if not found then assumes it is global
 		for (int i = scopes.size() - 1; i >= 0; i--) {
 			if (scopes.get(i).containsKey(name.lexeme)) {
-				// if found passes in distance between scope the variable is 
+				// if found passes in distance between scope the variable is
 				// located in and the innermost scope to the interpreter
 				interpreter.resolve(expr, scopes.size() - 1 - i);
 				return;
@@ -353,5 +356,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 		}
 	}
 
-}
+	@Override
+	public Void visitArrayLiteralExpr(ArrayLiteral expr) {
+		for (Expr value : expr.values) {
+			resolve(value);
+		}
+		return null;
+	}
 
+}

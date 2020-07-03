@@ -15,7 +15,7 @@ import java.util.*;
 import java.io.*;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-	
+
 	// allows interpreter to define things in global scope
 	final Environment globals = new Environment();
 	private Environment environment = globals;
@@ -39,7 +39,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				return (double)System.currentTimeMillis();
+				return (double) System.currentTimeMillis();
 			}
 		});
 
@@ -89,7 +89,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				int size = (int)(double) arguments.get(0);
+				int size = (int) (double) arguments.get(0);
 				return new DrawArray(size);
 			}
 		});
@@ -114,7 +114,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				return new DrawCanvas(new Canvas((int)(double) arguments.get(0), (int)(double) arguments.get(1)));
+				return new DrawCanvas(new Canvas((int) (double) arguments.get(0), (int) (double) arguments.get(1)));
 			}
 		});
 
@@ -126,10 +126,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				return new DrawColor( new Color(
-					(double)arguments.get(0)/255f, (double) arguments.get(1)/255f, 
-					(double) arguments.get(2)/255f, (double) arguments.get(3)/255f
-					));
+				return new DrawColor(new Color((double) arguments.get(0) / 255f, (double) arguments.get(1) / 255f,
+						(double) arguments.get(2) / 255f, (double) arguments.get(3) / 255f));
 			}
 		});
 
@@ -143,9 +141,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			public Object call(Interpreter interpreter, List<Object> arguments) {
 				String path = ((DrawString) arguments.get(0)).toString();
 				Image image = new Image(new File(path).toURI().toString());
-				return new DrawImage(new WritableImage(image.getPixelReader(), (int)image.getWidth(), (int)image.getHeight()));
+				return new DrawImage(
+						new WritableImage(image.getPixelReader(), (int) image.getWidth(), (int) image.getHeight()));
 			}
-		}); 
+		});
 
 		globals.define("saveImage", new DrawCallable() {
 			@Override
@@ -155,11 +154,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			@Override
 			public Object call(Interpreter interpreter, List<Object> arguments) {
-				// loads the image from the first argument, converts it to a java awt buffered image
+				// loads the image from the first argument, converts it to a java awt buffered
+				// image
 				String path = ((DrawString) arguments.get(1)).toString();
 				File saveFile = new File((String) path);
 				try {
-					ImageIO.write(SwingFXUtils.fromFXImage(((DrawImage) arguments.get(0)).image, null), "png", saveFile);
+					ImageIO.write(SwingFXUtils.fromFXImage(((DrawImage) arguments.get(0)).image, null), "png",
+							saveFile);
 				} catch (IOException e) {
 
 				}
@@ -211,7 +212,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Object visitLiteralExpr(Expr.Literal expr) {
 		// checks if expression is an array literal
-		if(expr.value instanceof DrawArray) {
+		if (expr.value instanceof DrawArray) {
 			DrawArray array = (DrawArray) expr.value;
 			// iterates through elements and evaluates them
 			for (int i = 0; i < array.elements.length; i++) {
@@ -229,10 +230,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		if (expr.operator.type == TokenType.OR) {
 			// if the operator is or and the left expression
 			// is truthy then return the left expression
-			if (isTruthy(left)) return left;
+			if (isTruthy(left))
+				return left;
 		} else {
 			// if it is an and and not truthy then return left
-			if (!isTruthy(left)) return left;
+			if (!isTruthy(left))
+				return left;
 		}
 
 		// otherwise evaluate the right expression because the conditionals
@@ -245,7 +248,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Object visitSetExpr(Expr.Set expr) {
 		Object object = evaluate(expr.object);
 
-		if (!(object instanceof DrawInstance)) { 
+		if (!(object instanceof DrawInstance)) {
 			// raise error if left side of set expression is not
 			// an instance
 			throw new RuntimeError(expr.name, "Only instances have fields.");
@@ -254,13 +257,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		// checks if array, sets element at index given to value given
 		if (object instanceof DrawArray) {
 			Object value = evaluate(expr.value);
-			((DrawArray)object).set((int)(double)evaluate(expr.index), value);
+			((DrawArray) object).set((int) (double) evaluate(expr.index), value);
 			return value;
 		}
 
 		// set field value in instance
 		Object value = evaluate(expr.value);
-		((DrawInstance)object).set(expr.name, value);
+		((DrawInstance) object).set(expr.name, value);
 		return value;
 	}
 
@@ -268,10 +271,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Object visitSuperExpr(Expr.Super expr) {
 		int distance = locals.get(expr);
 		// gets super class from class scope
-		DrawClass superclass = (DrawClass)environment.getAt(distance, "super");
+		DrawClass superclass = (DrawClass) environment.getAt(distance, "super");
 
 		// this is 1 closer than superclass to current scope
-		DrawInstance object = (DrawInstance)environment.getAt(distance - 1, "this");
+		DrawInstance object = (DrawInstance) environment.getAt(distance - 1, "this");
 
 		// looks for method in superclass
 		DrawFunction method = superclass.findMethod(object, expr.method.lexeme);
@@ -293,12 +296,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		throw new BreakException();
 	}
 
-
 	@Override
 	public Void visitContinueStmt(Stmt.Continue stmt) {
 		throw new ContinueException();
 	}
-
 
 	@Override
 	public Object visitUnaryExpr(Expr.Unary expr) {
@@ -309,7 +310,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				return !isTruthy(right);
 			case MINUS:
 				checkNumberOperand(expr.operator, right);
-				return -(double)right;
+				return -(double) right;
 			case PLUS_PLUS: {
 				if (!(expr.right instanceof Expr.Variable))
 					throw new RuntimeError(expr.operator, "Operand of an increment operator must be a variable.");
@@ -366,36 +367,47 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	// checks to see if operand is a number
 	private void checkNumberOperand(Token operator, Object operand) {
-		if (operand instanceof Double) return;
+		if (operand instanceof Double)
+			return;
 		throw new RuntimeError(operator, "Operand must be a number.");
 	}
 
 	private void checkNumberOperands(Token operator, Object left, Object right) {
-		if (left instanceof Double && right instanceof Double) return;
-	
+		if (left instanceof Double && right instanceof Double)
+			return;
+
 		throw new RuntimeError(operator, "Operands must be numbers.");
 	}
 
 	// returns false if value is null or false, otherwise returns true
 	private boolean isTruthy(Object object) {
-		if (object == null) return false;
-		if (object instanceof Boolean) return (boolean)object;
+		if (object == null)
+			return false;
+		if (object instanceof Boolean)
+			return (boolean) object;
 		return true;
 	}
 
 	private boolean isEqual(Object a, Object b) {
-		if (a == null && b == null) return true;
-		if (a == null) return false;
-		if(a instanceof DrawString) a = ((DrawString)a).toString();
-		if(b instanceof DrawString) b = ((DrawString)b).toString();
-		if(a instanceof DrawChar) a = ((DrawChar)a).toString();
-		if(b instanceof DrawChar) b = ((DrawChar)b).toString();
+		if (a == null && b == null)
+			return true;
+		if (a == null)
+			return false;
+		if (a instanceof DrawString)
+			a = ((DrawString) a).toString();
+		if (b instanceof DrawString)
+			b = ((DrawString) b).toString();
+		if (a instanceof DrawChar)
+			a = ((DrawChar) a).toString();
+		if (b instanceof DrawChar)
+			b = ((DrawChar) b).toString();
 		return a.equals(b);
 	}
 
-	// converts java value representation to draw lang 
+	// converts java value representation to draw lang
 	private String stringify(Object object) {
-		if (object == null) return "null";
+		if (object == null)
+			return "null";
 
 		if (object instanceof Double) {
 			String text = object.toString();
@@ -416,7 +428,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Object visitGroupingExpr(Expr.Grouping expr) {
 		return evaluate(expr.expression);
 	}
-
 
 	private Object evaluate(Expr expr) {
 		return expr.accept(this);
@@ -480,8 +491,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			DrawFunction function = new DrawFunction(method.name.lexeme, method.function, environment, false);
 			methods.put(method.name.lexeme, function);
 		}
-		DrawClass drawClass = new DrawClass(metaClass, stmt.name.lexeme, (DrawClass)superClass, methods);
-		if (superClass != null) environment = environment.enclosing;
+		DrawClass drawClass = new DrawClass(metaClass, stmt.name.lexeme, (DrawClass) superClass, methods);
+		if (superClass != null)
+			environment = environment.enclosing;
 		environment.assign(stmt.name, drawClass);
 		return null;
 	}
@@ -513,7 +525,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitReturnStmt(Stmt.Return stmt) {
 		Object value = null;
-		if (stmt.value != null) value = evaluate(stmt.value);
+		if (stmt.value != null)
+			value = evaluate(stmt.value);
 
 		throw new Return(value);
 	}
@@ -549,6 +562,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		return null;
 	}
 
+	public Object visitArrayLiteralExpr(Expr.ArrayLiteral expr) {
+		DrawArray array = new DrawArray(expr.values.size());
+		for (int i = 0; i < expr.values.size(); i++) {
+			array.set(i, evaluate(expr.values.get(i)));
+		}
+		return array;
+	}
+
 	@Override
 	public Object visitAssignExpr(Expr.Assign expr) {
 		// assigns new value to variable
@@ -560,10 +581,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			case EQUAL:
 				break;
 			case PLUS_EQUAL: {
-			 	Object current = environment.get(expr.name);
-			 	// if both numbers return sum
-			 	if (value instanceof Double && current instanceof Double) {
-					value = (double)current + (double)value;
+				Object current = environment.get(expr.name);
+				// if both numbers return sum
+				if (value instanceof Double && current instanceof Double) {
+					value = (double) current + (double) value;
 				}
 
 				// if both strings concatenate and return
@@ -576,43 +597,43 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 					value = new DrawString(stringify(current) + stringify(value));
 				}
 
-			 	break;
-			 }
+				break;
+			}
 
 			case MINUS_EQUAL: {
 				Object current = environment.get(expr.name);
-			 	checkNumberOperands(expr.equals, current, value);
-			 	value = (double) current - (double) value;
-			 	break;
-			 }
-			 
+				checkNumberOperands(expr.equals, current, value);
+				value = (double) current - (double) value;
+				break;
+			}
+
 			case STAR_EQUAL: {
 				Object current = environment.get(expr.name);
-			 	checkNumberOperands(expr.equals, current, value);
-			 	value = (double) current * (double) value;
-			 	break;
-			 }
-			 
+				checkNumberOperands(expr.equals, current, value);
+				value = (double) current * (double) value;
+				break;
+			}
+
 			case SLASH_EQUAL: {
 				Object current = environment.get(expr.name);
-			 	checkNumberOperands(expr.equals, current, value);
-			 	value = (double) current / (double) value;
-			 	break;
-			 }
-			 
+				checkNumberOperands(expr.equals, current, value);
+				value = (double) current / (double) value;
+				break;
+			}
+
 			case STAR_STAR_EQUAL: {
 				Object current = environment.get(expr.name);
-			 	checkNumberOperands(expr.equals, current, value);
-			 	value = Math.pow((double) current, (double) value);
-			 	break;
-			 }
+				checkNumberOperands(expr.equals, current, value);
+				value = Math.pow((double) current, (double) value);
+				break;
+			}
 
-			 case MODULOS_EQUAL: {
+			case MODULOS_EQUAL: {
 				Object current = environment.get(expr.name);
-			 	checkNumberOperands(expr.equals, current, value);
-			 	value = (double) current % (double) value;
-			 	break;
-			 }
+				checkNumberOperands(expr.equals, current, value);
+				value = (double) current % (double) value;
+				break;
+			}
 		}
 
 		Integer distance = locals.get(expr);
@@ -635,29 +656,31 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		switch (expr.operator.type) {
 			case GREATER:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left > (double)right;
+				return (double) left > (double) right;
 			case GREATER_EQUAL:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left >= (double)right;
+				return (double) left >= (double) right;
 			case LESS:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left < (double)right;
+				return (double) left < (double) right;
 			case LESS_EQUAL:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left <= (double)right;
-			case BANG_EQUAL: return !isEqual(left, right);
-			case EQUAL_EQUAL: return isEqual(left, right);
+				return (double) left <= (double) right;
+			case BANG_EQUAL:
+				return !isEqual(left, right);
+			case EQUAL_EQUAL:
+				return isEqual(left, right);
 			case MINUS:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left - (double)right;
+				return (double) left - (double) right;
 			// special case because '+' can be used for adding numbers
 			// or string concatenation
 			case PLUS:
 				if (left instanceof Double && right instanceof Double) {
-					return (double)left + (double)right;
+					return (double) left + (double) right;
 				}
 				if (left instanceof DrawString && right instanceof DrawString) {
-					return new DrawString((String)left.toString() + (String)right.toString());
+					return new DrawString((String) left.toString() + (String) right.toString());
 				}
 				if (left instanceof DrawString || right instanceof DrawString) {
 					return new DrawString(stringify(left) + stringify(right));
@@ -667,13 +690,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 			case SLASH:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left / (double)right;
+				return (double) left / (double) right;
 			case STAR:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left * (double)right;
+				return (double) left * (double) right;
 			case MODULOS:
 				checkNumberOperands(expr.operator, left, right);
-				return (double)left % (double)right;
+				return (double) left % (double) right;
 			case STAR_STAR:
 				checkNumberOperands(expr.operator, left, right);
 				return Math.pow((double) left, (double) right);
@@ -695,15 +718,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		if (!(callee instanceof DrawCallable))
 			throw new RuntimeError(expr.paren, "Can only call functions and classes.");
 
-		DrawCallable function = (DrawCallable)callee;
+		DrawCallable function = (DrawCallable) callee;
 
 		// checks if call has same number of arguments as function definition
 		if (arguments.size() != function.arity()) {
-			throw new RuntimeError(
-				expr.paren, 
-				"Expected " + function.arity() + 
-				" arguments but got " + arguments.size() + "."
-				);
+			throw new RuntimeError(expr.paren,
+					"Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
 		}
 
 		return function.call(this, arguments);
@@ -716,7 +736,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		// if object is array and index is given
 		// return element at array index
 		if (object instanceof DrawArray && expr.index != null) {
-			return ((DrawArray) object).get((int)(double)evaluate(expr.index));
+			return ((DrawArray) object).get((int) (double) evaluate(expr.index));
 		}
 		// if object is an instance then return field from object
 		if (object instanceof DrawInstance) {

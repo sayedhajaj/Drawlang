@@ -7,20 +7,48 @@ import java.util.List;
 
 abstract class Expr {
 	interface Visitor<R> {
+		R visitArrayLiteralExpr(ArrayLiteral expr);
+
 		R visitBinaryExpr(Binary expr);
+
 		R visitCallExpr(Call expr);
+
 		R visitGetExpr(Get expr);
+
 		R visitGroupingExpr(Grouping expr);
+
 		R visitLiteralExpr(Literal expr);
+
 		R visitLogicalExpr(Logical expr);
+
 		R visitSetExpr(Set expr);
+
 		R visitSuperExpr(Super expr);
+
 		R visitTernaryExpr(Ternary expr);
+
 		R visitThisExpr(This expr);
+
 		R visitUnaryExpr(Unary expr);
+
 		R visitVariableExpr(Variable expr);
+
 		R visitAssignExpr(Assign expr);
+
 		R visitFunctionExpr(Function expr);
+	}
+
+	static class ArrayLiteral extends Expr {
+
+		ArrayLiteral(List<Expr> values) {
+			this.values = values;
+		}
+
+		<R> R accept(Visitor<R> visitor) {
+			return visitor.visitArrayLiteralExpr(this);
+		}
+
+		final List<Expr> values;
 	}
 
 	static class Binary extends Expr {
@@ -29,7 +57,6 @@ abstract class Expr {
 			this.operator = operator;
 			this.right = right;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitBinaryExpr(this);
@@ -62,7 +89,6 @@ abstract class Expr {
 			this.name = name;
 			this.index = index;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitGetExpr(this);
@@ -77,7 +103,6 @@ abstract class Expr {
 		Grouping(Expr expression) {
 			this.expression = expression;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitGroupingExpr(this);
@@ -90,7 +115,6 @@ abstract class Expr {
 		Literal(Object value) {
 			this.value = value;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitLiteralExpr(this);
@@ -122,7 +146,6 @@ abstract class Expr {
 			this.index = index;
 			this.value = value;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitSetExpr(this);
@@ -182,7 +205,6 @@ abstract class Expr {
 			this.right = right;
 			this.postfix = postfix;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitUnaryExpr(this);
@@ -211,7 +233,6 @@ abstract class Expr {
 			this.value = value;
 			this.equals = equals;
 		}
-	
 
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitAssignExpr(this);
