@@ -1,6 +1,7 @@
 package com.drawlang.drawinterpreter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DrawMap extends DrawInstance {
 	
@@ -8,7 +9,7 @@ public class DrawMap extends DrawInstance {
 
 	DrawMap() {
 		super(null);
-		map = new HashMap();
+		map = new HashMap<String, Object>();
 	}
 
 	@Override
@@ -88,7 +89,12 @@ public class DrawMap extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
-						return new DrawArray(map.keySet().toArray());
+						Object[] strings = map.keySet().toArray();
+						DrawString[] newKeys = new DrawString[strings.length];
+						for (int i = 0; i < newKeys.length; i++) {
+							newKeys[i] = new DrawString((String) strings[i]);
+						}
+						return new DrawArray(newKeys);
 					}
 				};
 			case "values":
