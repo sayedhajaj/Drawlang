@@ -23,8 +23,8 @@ public class DrawMap extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
-						Object key = arguments.get(0);
-						return map.get(key);
+						DrawString key = (DrawString) arguments.get(0);
+						return map.get(key.toString());
 					}
 				};
 			case "put":
@@ -36,9 +36,9 @@ public class DrawMap extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
-						Object key = arguments.get(0);
+						DrawString key = (DrawString) arguments.get(0);
 						Object value = arguments.get(1);
-						return map.put(key, value);
+						return map.put(key.toString(), value);
 					}
 				};
 			case "clear":
@@ -63,8 +63,8 @@ public class DrawMap extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
-						Object key = arguments.get(0);
-						return map.containsKey(key);
+						DrawString key = (DrawString) arguments.get(0);
+						return map.containsKey(key.toString());
 					}
 				};
 			case "entries":
@@ -112,8 +112,8 @@ public class DrawMap extends DrawInstance {
 
 					@Override
 					public Object call(Interpreter interpreter, List<Object> arguments) {
-						Object key = arguments.get(0);
-						return map.remove(key);
+						DrawString key = (DrawString) arguments.get(0);
+						return map.remove(key.toString());
 					}
 				};
 			default:
